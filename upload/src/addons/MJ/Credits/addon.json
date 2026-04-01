@@ -1,0 +1,19 @@
+{
+    "legacy_addon_id": "MJ/Credits",
+    "title": "[BR] 积分",
+    "description": "XF2 积分系统",
+    "version_id": 1050000,
+    "version_string": "1.5.0",
+    "dev": "Brivium | 死了算了",
+    "dev_url": "https://www.cnxfans.com/resources/555/",
+    "faq_url": "https://www.cnxfans.com/threads/1019/",
+    "support_url": "https://www.cnxfans.com/threads/1019/",
+    "extra_urls": [],
+    "require": {
+        "XF": [
+            2030070,
+            "XenForo 2.3"
+        ]
+    },
+    "icon": "fa-credit-card-front"
+}

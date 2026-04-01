@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<class_extensions>
+  <extension from_class="XF\AddOn\DataManager" to_class="MJ\Credits\XF\AddOn\DataManager" execute_order="10" active="1"/>
+  <extension from_class="XF\Admin\Controller\User" to_class="MJ\Credits\XF\Admin\Controller\User" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Attachment" to_class="MJ\Credits\XF\Entity\Attachment" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ConversationMaster" to_class="MJ\Credits\XF\Entity\ConversationMaster" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ConversationMessage" to_class="MJ\Credits\XF\Entity\ConversationMessage" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ConversationUser" to_class="MJ\Credits\XF\Entity\ConversationUser" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Poll" to_class="MJ\Credits\XF\Entity\Poll" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\PollResponse" to_class="MJ\Credits\XF\Entity\PollResponse" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Post" to_class="MJ\Credits\XF\Entity\Post" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ProfilePost" to_class="MJ\Credits\XF\Entity\ProfilePost" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\ReactionContent" to_class="MJ\Credits\XF\Entity\ReactionContent" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Report" to_class="MJ\Credits\XF\Entity\Report" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\Thread" to_class="MJ\Credits\XF\Entity\Thread" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\User" to_class="MJ\Credits\XF\Entity\User" execute_order="10" active="1"/>
+  <extension from_class="XF\Entity\UserFollow" to_class="MJ\Credits\XF\Entity\UserFollow" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\ForumController" to_class="MJ\Credits\XF\Pub\Controller\Forum" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\Member" to_class="MJ\Credits\XF\Pub\Controller\Member" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\Post" to_class="MJ\Credits\XF\Pub\Controller\Post" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\Register" to_class="MJ\Credits\XF\Pub\Controller\Register" execute_order="10" active="1"/>
+  <extension from_class="XF\Pub\Controller\Thread" to_class="MJ\Credits\XF\Pub\Controller\Thread" execute_order="10" active="1"/>
+  <extension from_class="XF\Repository\Attachment" to_class="MJ\Credits\XF\Repository\Attachment" execute_order="10" active="1"/>
+  <extension from_class="XF\Repository\Poll" to_class="MJ\Credits\XF\Repository\Poll" execute_order="10" active="1"/>
+  <extension from_class="XF\Repository\Post" to_class="MJ\Credits\XF\Repository\Post" execute_order="10" active="1"/>
+  <extension from_class="XF\Repository\Thread" to_class="MJ\Credits\XF\Repository\Thread" execute_order="10" active="1"/>
+  <extension from_class="XF\Repository\ThreadWatch" to_class="MJ\Credits\XF\Repository\ThreadWatch" execute_order="10" active="1"/>
+  <extension from_class="XF\Service\Attachment\Preparer" to_class="MJ\Credits\XF\Service\Attachment\Preparer" execute_order="10" active="1"/>
+  <extension from_class="XF\Service\Post\Preparer" to_class="MJ\Credits\XF\Service\Post\Preparer" execute_order="10" active="1"/>
+  <extension from_class="XF\Service\Thread\Creator" to_class="MJ\Credits\XF\Service\Thread\Creator" execute_order="10" active="1"/>
+  <extension from_class="XF\Service\Thread\Editor" to_class="MJ\Credits\XF\Service\Thread\Editor" execute_order="10" active="1"/>
+  <extension from_class="XF\Str\Formatter" to_class="MJ\Credits\XF\Str\Formatter" execute_order="10" active="1"/>
+  <extension from_class="XF\Template\Templater" to_class="MJ\Credits\Template\Templater" execute_order="10" active="1"/>
+</class_extensions>

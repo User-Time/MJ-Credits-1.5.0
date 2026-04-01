@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<content_type_fields>
+  <field content_type="mjc_event" field_name="alert_handler_class">\MJ\Credits\Alert\Event</field>
+  <field content_type="mjc_event" field_name="entity">MJ\Credits:Event</field>
+  <field content_type="mjc_transaction" field_name="alert_handler_class">\MJ\Credits\Alert\Transaction</field>
+  <field content_type="mjc_transaction" field_name="entity">MJ\Credits:Transaction</field>
+</content_type_fields>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<code_event_listeners>
+  <listener event_id="app_pub_complete" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="appPubComplete" active="1" description="Award daily credits"/>
+  <listener event_id="app_setup" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="appSetup" active="1"/>
+  <listener event_id="criteria_user" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="criteriaUser" active="1" description="Check Credits Criteria"/>
+  <listener event_id="editor_dialog" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="editorDialog" active="1" hint="mjcCreditsCharge" description="注入编辑器对话框"/>
+  <listener event_id="entity_structure" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="userEntityStructure" active="1" hint="XF\Entity\User" description="Extends the User entity"/>
+  <listener event_id="navigation_setup" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="navigationSetup" active="1" description="以编程方式添加到导航栏菜单。"/>
+  <listener event_id="templater_macro_pre_render" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="templaterMacroPreRender" active="1" hint="admin:option_macros:option_form_block" description="修改选项宏以允许使用选项卡式选项。"/>
+  <listener event_id="user_searcher_orders" execute_order="10" callback_class="MJ\Credits\Listener" callback_method="userSearcherOrders" active="1"/>
+</code_event_listeners>

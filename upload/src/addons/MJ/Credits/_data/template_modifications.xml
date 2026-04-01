@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template_modifications>
+  <modification type="public" template="PAGE_CONTAINER" modification_key="mjc_PAGE_CONTAINER" description="添加导航栏（右侧-开始）" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[#<a href="{{ link\('account'\) }}"\s+class="[\w\-\s]+p-navgroup-link--user"\s+data-xf-click="menu"#siU]]></find>
+    <replace><![CDATA[<xf:macro id="mjc_nav_account_wallet::navbar" arg-section="start" arg-nav="{$navTree.mjcCredits}" />
+							$0]]></replace>
+  </modification>
+  <modification type="public" template="PAGE_CONTAINER" modification_key="mjc_credits_navbar_loop" description="如果需要，从主循环中删除导航栏条目" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[#(<xf:macro\s+id="nav_entry"\s+arg-[^/]+>)(.*)(<\/xf:macro>)#siU]]></find>
+    <replace><![CDATA[$1
+<xf:if is="$navId != 'mjcCredits' OR $xf.options.mjc_credits_navbar.enabled == 1">$2</xf:if>
+$3]]></replace>
+  </modification>
+  <modification type="public" template="PAGE_CONTAINER" modification_key="mjc_credits_navbar_right_end" description="添加导航栏（右侧-末尾）" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[#(<a href="{{ link\('account/alerts'\) }}"\s+class="[\w\-\s]+p-navgroup-link--alerts.*</div>.+)(</xf:if>)#siU]]></find>
+    <replace><![CDATA[$1	<xf:macro id="mjc_nav_account_wallet::navbar" arg-section="end" arg-nav="{$navTree.mjcCredits}" />
+						$2]]></replace>
+  </modification>
+  <modification type="public" template="PAGE_CONTAINER" modification_key="mjc_credits_navbar_right_middle" description="添加导航栏（右侧-中间）" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[#<a href="{{ link\('account/alerts'\) }}"\s+class="[\w\-\s]+p-navgroup-link--alerts#siU]]></find>
+    <replace><![CDATA[<xf:macro id="mjc_nav_account_wallet::navbar" arg-section="middle" arg-nav="{$navTree.mjcCredits}" />
+							$0]]></replace>
+  </modification>
+  <modification type="public" template="app_nav.less" modification_key="mjc_credits_app_nav_less_append" description="添加 mjc_credits_app_nav.less 到 app_nav.less" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[/$/]]></find>
+    <replace><![CDATA[{{ include('mjc_credits_app_nav.less') }}]]></replace>
+  </modification>
+  <modification type="public" template="editor" modification_key="mjc_credits_add_js" description="添加对JS文件的调用" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:include_js]-->]]></find>
+    <replace><![CDATA[<xf:js src="mj/mjc/editor.js" min="1" addon="MJ/Credits" />
+	$0]]></replace>
+  </modification>
+  <modification type="public" template="extra.less" modification_key="add_less_to_extra" description="添加css" execution_order="10" enabled="1" action="preg_replace">
+    <find><![CDATA[/^.*$/s]]></find>
+    <replace><![CDATA[.bonus_message{
+	text-align: left;
+	padding-top: 20px;
+	color: #ddd;
+	.formRow > dt {
+		border-right: 1px solid transparent;
+		border-right-color: transparent;
+		background: transparent;
+		border-color: transparent;
+		text-align: right;
+		width: 33%;
+		padding: 15px 10px 15px 10px;
+		padding-top: 22px;
+	}
+}
+$0]]></replace>
+  </modification>
+  <modification type="public" template="forum_post_thread" modification_key="add_offer_reward" description="添加悬赏到问题主题页面" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[		<ul class="listPlain">
+		<xf:contentcheck>]]></find>
+    <replace><![CDATA[$0
+<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('offerReward')}">
+<li class="js-threadTypeData" data-type-id="question" style="{{ $defaultThreadType == 'question' ? '' : 'display:none;'}}">
+	<hr class="formRowSep" />
+	<xf:include template="mjc_offer_reward_create" />
+	</li>
+</xf:if>]]></replace>
+  </modification>
+  <modification type="admin" template="helper_criteria" modification_key="mjc_credits_trophy_criteria" description="添加用户条件" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:user:after_content]-->]]></find>
+    <replace><![CDATA[$0
+			<xf:include template="mjc_credits_user_criteria" />]]></replace>
+  </modification>
+  <modification type="public" template="helper_thread_options" modification_key="add_bonus_to_forum_post_thread" description="添加抢红包选项到发布主题页面" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$visible">]]></find>
+    <replace><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('bonus')}">
+<hr class="formRowSep" />
+	<xf:include template="mjc_bonus_create" />
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="helper_thread_options" modification_key="add_reward_for_thread_view" description="添加打赏选项到发布主题页面" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$thread.canLockUnlock()">]]></find>
+    <replace><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('reward')}">
+<xf:option name="reward" value="1" selected="{$thread.reward}"
+		   label="{{ phrase('打赏') }}"
+		   hint="{{ phrase('是否接受其他用户打赏自己。') }}">
+	<xf:afterhtml>
+		<xf:hiddenval name="_xfSet[reward]" value="1" />
+	</xf:afterhtml>
+</xf:option>
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="member_macros" modification_key="add_credits_to_member_macros" description="添加积分信息到用户提示工具里" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:stat_pairs:below_trophies]-->]]></find>
+    <replace><![CDATA[<xf:macro id="mjc_credits_postbit::credits_stat_pair" arg-user="{$user}" />
+$0]]></replace>
+  </modification>
+  <modification type="public" template="member_macros" modification_key="add_mjc_fine" description="罚款按钮" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:moderator_menu:bottom]-->]]></find>
+    <replace><![CDATA[<xf:if is="$xf.visitor.canFine()">
+		<a href="{{ link('members/fine', $user) }}" class="menu-linkRow" data-xf-click="overlay">{{ phrase('mjc_fine') }}</a>
+	</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="message_macros" modification_key="add_credits_to_message_macros" description="添加积分到用户信息" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$extras.custom_fields">]]></find>
+    <replace><![CDATA[<xf:macro id="mjc_credits_postbit::message_macros_postbit" arg-user="{$user}" />
+$0]]></replace>
+  </modification>
+  <modification type="public" template="post_article_macros" modification_key="add_mjc_bonus_list" description="添加红包" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:macro id="post_macros::post_last_edit" arg-post="{$post}" />]]></find>
+    <replace><![CDATA[<xf:include template="public:mjc_charge_purchaser_list" />
+
+<xf:if is="$post.Reward is not empty">
+	<xf:include template="public:mjc_reward_user_list" />
+</xf:if>
+<xf:include template="public:mjc_red_envelope_list" />
+<xf:if is="$post.isFirstPost()">	
+	<xf:include template="public:mjc_bonus_list" />
+	<xf:include template="public:mjc_bonus_receiver_list" />
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="post_macros" modification_key="add_action_delete_bonus" description="添加删除进行中的抢红包按钮" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$post.canReport()">]]></find>
+    <replace><![CDATA[<xf:if is="$post.getBonus() is not empty">
+	<xf:if is="$xf.visitor.is_super_admin AND $post.isFirstPost()">
+	<a href="{{ link('posts/deleteBonus', $post) }}"
+	   class="actionBar-action actionBar-action--report"
+	   data-xf-click="overlay">
+		{{ phrase('删除红包') }}
+	</a>
+</xf:if>
+</xf:if>
+
+$0]]></replace>
+  </modification>
+  <modification type="public" template="post_macros" modification_key="mjc_charge_purchaser_list_post_macros" description="添加积分内容" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:macro id="message_macros::signature" arg-user="{$post.User}" />]]></find>
+    <replace><![CDATA[$0
+<xf:include template="public:mjc_charge_purchaser_list" />
+
+<xf:if is="$post.Reward is not empty">
+	<xf:include template="public:mjc_reward_user_list" />
+</xf:if>
+<xf:include template="public:mjc_red_envelope_list" />
+<xf:if is="$post.isFirstPost()">
+	
+	<xf:include template="public:mjc_bonus_list" />
+	<xf:include template="public:mjc_bonus_receiver_list" />
+</xf:if>
+]]></replace>
+  </modification>
+  <modification type="public" template="post_macros" modification_key="red_envelope_to_post_macros" description="添加红包按钮" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$post.canReport()">]]></find>
+    <replace><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('red_envelope')}">
+	<xf:if is="$xf.visitor.user_id">
+		<xf:if is="$post.user_id != $xf.visitor.user_id">
+			<a href="{{ link('posts/redEnvelope', $post) }}"
+			   class="actionBar-action actionBar-action--report"
+			   data-xf-click="overlay">
+				{{ phrase('mjc_envelope') }}
+			</a>
+		</xf:if>
+	</xf:if>
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="post_macros" modification_key="reward_post_macros" description="添加打赏按钮" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$post.canReport()">]]></find>
+    <replace><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('reward')}">
+	<xf:if is="$xf.visitor.user_id && $post.user_id != $xf.visitor.user_id">
+		<a href="{{ link('posts/reward', $post) }}"
+		   class="actionBar-action actionBar-action--report"
+		   data-xf-click="overlay">{{ phrase('打赏') }}</a>
+	</xf:if>
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="structured_list.less" modification_key="add_bonus_icon_to_structured_list" description="添加红包图标到主题列表" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[&--solved::before]]></find>
+    <replace><![CDATA[
+        &--bonus::before { .m-faContent(@fa-var-sack-dollar); color: rgb(205, 127, 50);}
+$0]]></replace>
+  </modification>
+  <modification type="public" template="thread_list_macros" modification_key="add_bonus_icon_to_thread_list_macros" description="添加红包图标到主题列表" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$thread.sticky">]]></find>
+    <replace><![CDATA[<xf:if is="$thread.getBonus() is not empty">
+							<li>
+							<i class="structItem-status structItem-status--bonus" aria-hidden="true" title="{{ phrase('红包主题')|for_attr }}"></i>
+							<span class="u-srOnly">{{ phrase('红包主题') }}</span>
+						</li>
+					</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="thread_list_macros" modification_key="add_reward_prefix_in_thread_list_macros" description="添加悬赏状态" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:if is="$thread.prefix_id">]]></find>
+    <replace><![CDATA[<xf:if is="$thread.reward_amount > 0">
+	<xf:if is="{$thread.Question.solution_user_id} == 0">
+		<span class="label label--accent" dir="auto" data-xf-init="tooltip" title="悬赏中">赏</span>
+		<xf:else />
+		<span class="label label--primary" dir="auto" data-xf-init="tooltip" title="悬赏已完成">赏</span>
+	</xf:if>
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="public" template="thread_view" modification_key="offer_a_reward_to_thread_view_type_question" description="添加悬赏金额显示" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<div class="block-outer"><xf:trim>]]></find>
+    <replace><![CDATA[<xf:if is="$thread.reward_amount > 0">
+	<xf:css src="mjc_overview.less" />
+	<div class="block-outer-reward">
+		<div class="buttonGroup">
+			<button class="button--primary button">
+				<xf:if is="{$thread.Question.solution_user_id} != '0'">
+					悬赏已完成。金额为 {$thread.reward_amount|mjc_currency($thread.reward_currency_id)}
+					<xf:else />
+					<a href="{{ link('threads/reward-edit', $thread) }}" data-xf-click="overlay">悬赏：{$thread.reward_amount|mjc_currency($thread.reward_currency_id)}</a>
+				</xf:if>
+			</button>
+		</div>
+	</div>
+</xf:if>
+$0]]></replace>
+  </modification>
+  <modification type="admin" template="tools_rebuild" modification_key="mjc_tools_rebuild" description="Append credits rebuilds to the end of the rebuild caches system." execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:rebuild_bottom]-->]]></find>
+    <replace><![CDATA[$0
+<xf:include template="mjc_tools_rebuild" />]]></replace>
+  </modification>
+  <modification type="admin" template="user_edit" modification_key="mjc_user_edit_panel" description="Add wallet panel" execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<xf:submitrow icon="save" sticky="true" />]]></find>
+    <replace><![CDATA[<xf:include template="mjc_user_edit_panel" />$0]]></replace>
+  </modification>
+</template_modifications>

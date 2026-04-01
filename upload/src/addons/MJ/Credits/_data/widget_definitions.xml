@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget_definitions>
+  <widget_definition definition_id="mjc_balance" definition_class="MJ\Credits\Widget\Balance"/>
+  <widget_definition definition_id="mjc_clock_in_every_day" definition_class="\MJ\Credits\Widget\ClockInEveryDay"/>
+  <widget_definition definition_id="mjc_richest" definition_class="MJ\Credits\Widget\Richest"/>
+</widget_definitions>

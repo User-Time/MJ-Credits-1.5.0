@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mjc_event_definitions>
+  <event_definition definition_id="adjust" definition_class="\MJ\Credits\Event\EventHandler" display_order="1000"/>
+  <event_definition definition_id="attachment_delete" display_order="9010"/>
+  <event_definition definition_id="attachment_download" definition_class="MJ\Credits\Event\Attachment" display_order="9020"/>
+  <event_definition definition_id="attachment_download_receive" definition_class="MJ\Credits\Event\Attachment" display_order="9030"/>
+  <event_definition definition_id="attachment_upload" display_order="9000"/>
+  <event_definition definition_id="avatar_delete" display_order="2110"/>
+  <event_definition definition_id="avatar_upload" display_order="2100"/>
+  <event_definition definition_id="birthday" display_order="1100"/>
+  <event_definition definition_id="bonus" definition_class="MJ\Credits\Event\bonus" display_order="1060"/>
+  <event_definition definition_id="content" definition_class="MJ\Credits\Event\Content" display_order="8220"/>
+  <event_definition definition_id="conversation_leave" display_order="5030"/>
+  <event_definition definition_id="conversation_new" display_order="5000"/>
+  <event_definition definition_id="conversation_receive" display_order="5020"/>
+  <event_definition definition_id="conversation_reply_new" display_order="5100"/>
+  <event_definition definition_id="conversation_reply_receive" display_order="5120"/>
+  <event_definition definition_id="daily_clock" definition_class="\MJ\Credits\Event\EventHandler" display_order="1080"/>
+  <event_definition definition_id="daily_login" display_order="100"/>
+  <event_definition definition_id="exchange" definition_class="\MJ\Credits\Event\EventHandler" display_order="1000"/>
+  <event_definition definition_id="fine" definition_class="\MJ\Credits\Event\Fine" display_order="1030"/>
+  <event_definition definition_id="follow" display_order="4010"/>
+  <event_definition definition_id="follower_lose" display_order="4040"/>
+  <event_definition definition_id="follower_receive" display_order="4030"/>
+  <event_definition definition_id="offerReward" display_order="4800"/>
+  <event_definition definition_id="payment" definition_class="MJ\Credits\Event\payment" display_order="1070"/>
+  <event_definition definition_id="poll_create" display_order="7000"/>
+  <event_definition definition_id="poll_delete" display_order="7010"/>
+  <event_definition definition_id="poll_vote" display_order="7020"/>
+  <event_definition definition_id="poll_vote_receive" display_order="7030"/>
+  <event_definition definition_id="post_delete" display_order="8010"/>
+  <event_definition definition_id="post_like" display_order="8030"/>
+  <event_definition definition_id="post_like_lose" display_order="8070"/>
+  <event_definition definition_id="post_like_receive" display_order="8060"/>
+  <event_definition definition_id="post_new" display_order="8000"/>
+  <event_definition definition_id="post_report" display_order="8200"/>
+  <event_definition definition_id="post_report_receive" display_order="8210"/>
+  <event_definition definition_id="post_unlike" display_order="8040"/>
+  <event_definition definition_id="profile_post_delete" display_order="4220"/>
+  <event_definition definition_id="profile_post_like" display_order="4300"/>
+  <event_definition definition_id="profile_post_like_lose" display_order="4330"/>
+  <event_definition definition_id="profile_post_like_receive" display_order="4320"/>
+  <event_definition definition_id="profile_post_lose" display_order="4240"/>
+  <event_definition definition_id="profile_post_new" display_order="4210"/>
+  <event_definition definition_id="profile_post_receive" display_order="4230"/>
+  <event_definition definition_id="profile_post_unlike" display_order="4310"/>
+  <event_definition definition_id="red_envelope" definition_class="MJ\Credits\Event\RedEnvelope" display_order="1050"/>
+  <event_definition definition_id="register" display_order="200"/>
+  <event_definition definition_id="reward" definition_class="MJ\Credits\Event\Reward" display_order="2000"/>
+  <event_definition definition_id="soft_post_delete" definition_class="\MJ\Credits\Event\EventHandler" display_order="8020"/>
+  <event_definition definition_id="soft_thread_delete" definition_class="\MJ\Credits\Event\EventHandler" display_order="6020"/>
+  <event_definition definition_id="thread_delete" display_order="6010"/>
+  <event_definition definition_id="thread_new" display_order="6000"/>
+  <event_definition definition_id="thread_reply_lose" display_order="6110"/>
+  <event_definition definition_id="thread_reply_receive" display_order="6100"/>
+  <event_definition definition_id="thread_sticky" display_order="6220"/>
+  <event_definition definition_id="thread_unsticky" display_order="6230"/>
+  <event_definition definition_id="thread_unwatch" display_order="6310"/>
+  <event_definition definition_id="thread_view" display_order="6200"/>
+  <event_definition definition_id="thread_view_receive" display_order="6210"/>
+  <event_definition definition_id="thread_watch" display_order="6300"/>
+  <event_definition definition_id="thread_watch_lose" display_order="6330"/>
+  <event_definition definition_id="thread_watch_receive" display_order="6320"/>
+  <event_definition definition_id="transfer" definition_class="\MJ\Credits\Event\Transfer" display_order="1020"/>
+  <event_definition definition_id="unfollow" display_order="4020"/>
+  <event_definition definition_id="update_status" display_order="4200"/>
+</mjc_event_definitions>

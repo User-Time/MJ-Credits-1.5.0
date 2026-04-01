@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<admin_navigation>
+  <admin_navigation_entry navigation_id="mjcCredits" display_order="301" link="mjc-credits" icon="fa-credit-card" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcCreditsOption" parent_navigation_id="mjcCredits" display_order="70" icon="fad fa-sliders-h" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcCreditsOptions" parent_navigation_id="mjcCreditsOption" display_order="10" link="mjc-credits/options" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcCurrencies" parent_navigation_id="mjcCredits" display_order="20" link="mjc-credits/currencies" admin_permission_id="mjcCurrency" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcDevCredits" parent_navigation_id="development" display_order="901" icon="fa-credit-card" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcEventDefinitions" parent_navigation_id="mjcDevCredits" display_order="10" link="mjc-credits/events/definitions/" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcEvents" parent_navigation_id="mjcCredits" display_order="40" icon="fa-tasks" debug_only="0" development_only="0" hide_no_children="1"/>
+  <admin_navigation_entry navigation_id="mjcImport" parent_navigation_id="mjcTools" display_order="30" link="mjc-credits/import" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcListAllEvents" parent_navigation_id="mjcEvents" display_order="10" link="mjc-credits/events" admin_permission_id="mjcEvent" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcListAllTransactions" parent_navigation_id="mjcTransactions" display_order="10" link="mjc-credits/transactions" admin_permission_id="mjcTransaction" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcReset" parent_navigation_id="mjcTools" display_order="20" link="mjc-credits/reset" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcStats" parent_navigation_id="mjcCredits" display_order="10" link="mjc-credits" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+  <admin_navigation_entry navigation_id="mjcTools" parent_navigation_id="mjcCredits" display_order="60" icon="fad fa-wrench" debug_only="0" development_only="0" hide_no_children="1"/>
+  <admin_navigation_entry navigation_id="mjcTransactions" parent_navigation_id="mjcCredits" display_order="40" icon="fa-list-alt" debug_only="0" development_only="0" hide_no_children="1"/>
+  <admin_navigation_entry navigation_id="mjcTransfer" parent_navigation_id="mjcTools" display_order="5" link="mjc-credits/transfer" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="1"/>
+  <admin_navigation_entry navigation_id="mjcUserList" parent_navigation_id="mjcCredits" display_order="30" link="mjc-credits/users" admin_permission_id="mjcCredits" debug_only="0" development_only="0" hide_no_children="0"/>
+</admin_navigation>

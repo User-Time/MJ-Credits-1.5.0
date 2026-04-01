@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+  <permission permission_group_id="mjcCredits" permission_id="bypassChargeTag" permission_type="flag" interface_group_id="mjcCreditsPermission" display_order="40"/>
+  <permission permission_group_id="mjcCredits" permission_id="canFine" permission_type="flag" interface_group_id="mjcCreditsPermission" display_order="666"/>
+  <permission permission_group_id="mjcCredits" permission_id="useCredits" permission_type="flag" interface_group_id="mjcCreditsPermission" display_order="10"/>
+  <permission permission_group_id="mjcCredits" permission_id="viewHidden" permission_type="flag" interface_group_id="mjcCreditsPermission" display_order="30"/>
+  <permission permission_group_id="mjcCredits" permission_id="viewOthers" permission_type="flag" interface_group_id="mjcCreditsPermission" display_order="20"/>
+</permissions>

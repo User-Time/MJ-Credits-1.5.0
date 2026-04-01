@@ -1,0 +1,3467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+  <template type="admin" title="mjc_credits_clear" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/clear') }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('mjc_sure_you_want_to_clear_all_user_credits') }}
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('clear') }}" rowtype="simple" icon="delete" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_credits_option_macros" version_id="1020800" version_string="1.2.8"><![CDATA[<xf:macro name="option_form_block" arg-group="" arg-options="!" arg-containerBeforeHtml="" arg-headers="{{ [] }}">
+	<xf:if is="$options is not empty">
+		<xf:form action="{{ link('options/update') }}" ajax="true" class="block">
+			{$containerBeforeHtml|raw}
+			<div class="block-container">
+				
+				<xf:foreach loop="$headers" value="$header">
+					<xf:macro name="option_rows" arg-header="{$header.label}" 
+							  arg-group="{$group}" arg-options="{$options}" 
+							  arg-minDisplayOrder="{$header.minDisplayOrder}" arg-maxDisplayOrder="{$header.maxDisplayOrder}" />
+				</xf:foreach>
+
+				<xf:submitrow sticky="true" icon="save" />
+			</div>
+		</xf:form>
+	</xf:if>
+</xf:macro>
+
+<xf:macro name="option_form_block_tabs" arg-group="" arg-options="!" arg-containerBeforeHtml="" arg-headers="{{ [] }}">
+	<xf:if is="$options is not empty">
+		<xf:form action="{{ link('options/update') }}" ajax="true" class="block">
+			{$containerBeforeHtml|raw}
+			<div class="block-container">
+				<h2 class="block-tabHeader tabs" data-xf-init="tabs" role="tablist">
+					<xf:foreach loop="$headers" key="$key" value="$header">
+						<a class="tabs-tab{{ $header.active ? ' is-active' : '' }}" role="tab" tabindex="0" aria-controls="{$key}">{$header.label}</a>
+					</xf:foreach>
+				</h2>
+				<ul class="tabPanes">
+					<xf:foreach loop="$headers" key="$key" value="$header">
+						<li class="{{ $header.active ? 'is-active' : '' }}" role="tabpanel" id="{$key}">
+							<xf:macro name="option_rows"
+									  arg-group="{$group}" arg-options="{$options}" 
+									  arg-minDisplayOrder="{$header.minDisplayOrder}" arg-maxDisplayOrder="{$header.maxDisplayOrder}" />
+						</li>
+					</xf:foreach>
+				</ul>
+				<xf:submitrow sticky="true" icon="save" />
+			</div>
+		</xf:form>
+	</xf:if>
+</xf:macro>
+
+<xf:macro name="option_rows" arg-header="" arg-group="!" arg-options="!" arg-minDisplayOrder="{{ 0 }}" arg-maxDisplayOrder="!">
+	<xf:set var="$hundred" value="0" />
+
+	<xf:if is="$header">
+		<h3 class="block-formSectionHeader">{$header}</h3>
+	</xf:if>
+
+	<div class="block-body">
+		<xf:foreach loop="$options" value="$option">
+			<xf:if is="{$option.Relations.{$group.group_id}.display_order} >= $minDisplayOrder AND ({$option.Relations.{$group.group_id}.display_order} < $maxDisplayOrder OR $maxDisplayOrder == -1)">
+				<xf:if is="$group">
+					<xf:set var="$curHundred" value="{{ floor($option.Relations.{$group.group_id}.display_order / 100) }}" />
+					<xf:if is="{{ $curHundred > $hundred }}">
+						<xf:set var="$hundred" value="{$curHundred}" />
+						<hr class="formRowSep" />
+					</xf:if>
+				</xf:if>
+
+				<xf:macro template="option_macros" name="option_row"
+						  arg-group="{$group}" arg-option="{$option}" />
+			</xf:if>
+		</xf:foreach>
+	</div>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_credits_user_criteria" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:set var="$currencies" value="{$xf.app.em.getRepository('MJ\Credits:Currency').getCurrencies()}" />
+
+<xf:checkboxrow label="{{ phrase('mjc_credits_credits_long') }}">
+	<xf:foreach loop="$currencies" key="$currencyId" value="$currency">
+		<xf:option label="{{ phrase('mjc_credits_less_than_x_y:', {'param1': $currency.title}) }}" name="user_criteria[mjc_credits_currency_{$currencyId}_less][rule]" value="mjc_credits_currency_{$currencyId}_less" selected="{{ $currency.isCriteriaSelected($criteria, 'less') }}">
+			<xf:numberbox name="user_criteria[mjc_credits_currency_{$currencyId}_less][data][amount]" value="{{ $currency.getCriteriaValue($criteria, 'less') }}" />
+		</xf:option>
+
+		<xf:option label="{{ phrase('mjc_credits_more_than_x_y:', {'param1': $currency.title}) }}" name="user_criteria[mjc_credits_currency_{$currencyId}_more][rule]" value="mjc_credits_currency_{$currencyId}_more" selected="{{ $currency.isCriteriaSelected($criteria, 'more') }}">
+			<xf:numberbox name="user_criteria[mjc_credits_currency_{$currencyId}_more][data][amount]" value="{{ $currency.getCriteriaValue($criteria, 'more') }}" />
+		</xf:option>
+	</xf:foreach>
+</xf:checkboxrow>
+
+<hr class="formRowSep" />]]></template>
+  <template type="admin" title="mjc_currency_delete" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/currencies/delete', $currency) }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+				<strong><a href="{{ link('mjc-credits/currencies/edit', $currency) }}">{$currency.title}</a></strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow rowtype="simple" icon="delete" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_currency_edit" version_id="1040900" version_string="1.4.9"><![CDATA[<xf:if is="$currency.isInsert()">
+	<xf:title>{{ phrase('mjc_add_currency') }}</xf:title>
+<xf:else />
+	<xf:title>{{ phrase('mjc_edit_currency:') }} {$currency.title}</xf:title>
+</xf:if>
+
+<xf:pageaction if="$currency.isUpdate()">
+	<xf:button href="{{ link('mjc-credits/currencies/delete', $currency) }}" icon="delete" overlay="true" />
+</xf:pageaction>
+
+<xf:form action="{{ link('mjc-credits/currencies/save', $currency) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:textboxrow name="title" value="{{ $currency.currency_id ? $currency.MasterTitle.phrase_text : '' }}"
+				label="{{ phrase('title') }}" />
+
+			<xf:textarearow name="description" value="{{ $currency.currency_id ? $currency.MasterDescription.phrase_text : '' }}" autosize="true"
+				label="{{ phrase('description') }}"/>
+
+			<xf:checkboxrow>				
+				<xf:option name="active" value="1" selected="$currency.active">{{ phrase('enabled') }}</xf:option>
+			</xf:checkboxrow>
+
+			<xf:numberboxrow name="display_order" value="{$currency.display_order}" type="number" min="0" step="5"
+				label="{{ phrase('display_order') }}" />
+			<h3 class="block-formSectionHeader">
+				<span class="block-formSectionHeader-aligner">{{ phrase('mjc_currency_options') }}</span>
+			</h3>
+			<xf:numberboxrow name="exchange_rate" value="{{ $currency.exchange_rate + 0}}" step="any"
+				label="{{ phrase('mjc_exchange_rate') }}"
+				explain="{{ phrase('mjc_exchange_rate_explain') }}" min="0" />
+			
+			<xf:checkboxrow>
+				<xf:option name="wallet_popup" value="1" selected="$currency.wallet_popup" hint="{{ phrase('mjc_credits_currency_displaycurrency_explain') }}">{{ phrase('mjc_credits_currency_displaycurrency') }}</xf:option>
+				<xf:option name="positive" value="1" selected="$currency.positive">{{ phrase('mjc_only_positive_numbers_are_allowed') }}</xf:option>
+			</xf:checkboxrow>
+			<xf:numberboxrow name="max_amount" value="{{ $currency.max_amount + 0 }}" type="number" min="0" step="any"
+							 label="{{ phrase('max_amount') }}"
+							 explain="{{ phrase('mjc_max_amount_explain') }}"/>
+
+			<h3 class="block-formSectionHeader">
+				<span class="block-formSectionHeader-aligner">{{ phrase('mjc_format_options') }}</span>
+			</h3>
+			<div class="block-body">
+				<xf:comment><xf:textboxrow name="code" value="{$currency.code}" size="15"
+					label="{{ phrase('mjc_code') }}"
+					class="input--autoSize" />
+				</xf:comment>
+				<xf:textboxrow name="prefix" value="{$currency.prefix}" size="15"
+					label="{{ phrase('mjc_prefix') }}"
+					class="input--autoSize" />
+
+				<xf:textboxrow name="suffix" value="{$currency.suffix}" size="15"
+					label="{{ phrase('mjc_suffix') }}"
+					class="input--autoSize" />
+
+				<xf:numberboxrow name="decimal_places" value="{$currency.decimal_places}"
+					label="{{ phrase('mjc_decimal_places') }}"
+					explain="{{ phrase('mjc_decimal_places_explain') }}" min="0" max="8" />
+			</div>
+
+			<h3 class="block-formSectionHeader">
+				<span class="block-formSectionHeader-aligner">{{ phrase('mjc_advanced_options') }}</span>
+			</h3>
+			<div class="block-body">
+				<xf:macro template="helper_user_group_edit" name="checkboxes"
+					arg-selectedUserGroups="{{ $currency.currency_id ? $currency.allowed_user_group_ids : [-1] }}" />
+			</div>
+		</div>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_currency_list" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_currencies') }}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('mjc-credits/currencies/add') }}" icon="add">{{ phrase('mjc_add_currency') }}</xf:button>
+</xf:pageaction>
+
+<xf:if is="$currencies is not empty">
+	<xf:form action="{{ link('mjc-credits/currencies/toggle') }}" class="block" ajax="true">
+		<div class="block-outer">
+			<xf:macro template="filter_macros" name="quick_filter" arg-key="mjc-currency" arg-class="block-outer-opposite" />
+		</div>
+		<div class="block-container">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:foreach loop="$currencies" value="$currency">
+						<xf:datarow
+							hash="{$currency.currency_id}"
+							href="{{ link('mjc-credits/currencies/edit', $currency) }}"
+							label="{$currency.title}"
+							explain="{$currency.description}"
+							delete="{{ link('mjc-credits/currencies/delete', $currency) }}">
+							<xf:cell class="dataList-cell--min"><i class="fa fa-exchange" aria-hidden="true"></i> {$currency.exchange_rate|number}</xf:cell>
+							<xf:cell class="dataList-cell--separated dataList-cell--min">{{ mjc_format(123456.789, $currency) }}</xf:cell>
+							<xf:toggle name="active[{$currency.currency_id}]"
+										selected="$currency.active"
+										class="dataList-cell--separated" submit="true" />
+						</xf:datarow>
+					</xf:foreach>
+				</xf:datalist>
+			</div>
+		</div>
+	</xf:form>
+<xf:else />
+	<div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+</xf:if>]]></template>
+  <template type="admin" title="mjc_currency_macros" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:macro name="currency_edit"
+	arg-currencyId="0"
+	arg-row="{{ true }}"
+	arg-class=""
+	arg-inputName="currency_id"
+	arg-includeAny="{{ false }}"
+	arg-includeEmpty="{{ true }}">
+	<xf:set var="$currencyRepo" value="{{ $xf.app.em.getRepository('MJ\Credits:Currency') }}" />
+	<xf:set var="$select">
+		<xf:select name="{$inputName}" value="{{ $currencyId === false ? $currencyRepo.getDefaultAddOnId() : $currencyId }}" class="{$class}">
+			<xf:if is="$includeEmpty">
+				<xf:option value=""></xf:option>
+			</xf:if>
+			<xf:if is="$includeAny">
+				<xf:option value="_any">({{ phrase('any') }})</xf:option>
+			</xf:if>
+			<xf:foreach loop="{{ $currencyRepo.findCurrenciesForList().fetch() }}" value="$currency">
+				<xf:option value="{$currency.currency_id}">{$currency.title}</xf:option>
+			</xf:foreach>
+		</xf:select>
+	</xf:set>
+	<xf:if is="$row">
+		<xf:formrow rowtype="input"
+			label="{{ phrase('mjc_currency') }}">
+			{$select|raw}
+		</xf:formrow>
+	<xf:else />
+		{$select|raw}
+	</xf:if>
+</xf:macro>
+
+<xf:macro name="currency_change_menu"
+	arg-currencies="!"
+	arg-route="!"
+	arg-routeData="!"
+	arg-routeParams="{{ {} }}"
+	arg-currentCurrency="{{ null }}"
+	arg-includeAny="{{ false }}"
+	arg-linkClass="button button--link">
+
+	<a class="{$linkClass} menuTrigger"
+		data-xf-click="menu"
+		role="button"
+		tabindex="0"
+		aria-expanded="false"
+		aria-haspopup="true">{{ phrase('mjc_currency:') }} {{ $currentCurrency ? $currentCurrency.title : phrase('(any)') }}</a>
+
+	<div class="menu" data-menu="menu" aria-hidden="true">
+		<div class="menu-content">
+			<h3 class="menu-header">{{ phrase('mjc_currencies') }}</h3>
+			<xf:if is="$includeAny">
+				<a href="{{ link($route, $routeData, {'currency_id': null} + $routeParams) }}"
+					class="menu-linkRow {{ !$currentCurrency ? 'is-selected' : '' }}">
+					{{ phrase('(any)') }}
+				</a>
+			</xf:if>
+			<xf:foreach loop="$currencies" value="$currency">
+				<a href="{{ link($route, $routeData, {'currency_id': $currency.currency_id} + $routeParams) }}"
+					class="menu-linkRow {{ ($currentCurrency && $currentCurrency.currency_id == $currency.currency_id) ? 'is-selected' : '' }}">
+					{$currency.title}
+				</a>
+			</xf:foreach>
+		</div>
+	</div>
+</xf:macro>
+
+<xf:macro name="currency_select"
+	arg-currencies="!"
+	arg-currencyId=""
+	arg-name="currency_id"
+	arg-includeAny="{{ false }}"
+	arg-row="{{ true }}">
+	<xf:if is="{{ count($currencies) == 1 }}">
+		<xf:set var="$row" value="{{ false }}" />
+		<xf:foreach loop="{{ $currencies }}" value="$currency">
+			{$currency.title}
+			<xf:hiddenval name="{$name}">{$currency.currency_id}</xf:hiddenval>
+		</xf:foreach>
+	<xf:else />
+		<xf:set var="$select">
+			<xf:select name="{$name}" value="{$currencyId}">
+				<xf:if is="{$includeAny}">
+					<xf:option label="{{ phrase('any') }}" />
+				</xf:if>
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title}</xf:option>
+				</xf:foreach>
+			</xf:select>
+		</xf:set>
+	</xf:if>
+
+	<xf:if is="$row">
+		<xf:formrow rowtype="input"
+			label="{{ phrase('mjc_currency') }}">
+			{$select|raw}
+		</xf:formrow>
+	<xf:else />
+		{$select|raw}
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_event_bulk_delete" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_events') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/events/bulk-delete') }}" class="block" ajax="true">
+	<div class="block-outer">
+		<div class="block-outer-main">
+			<xf:macro id="mjc_currency_macros::currency_change_menu"
+				arg-currencies="{$currencies}"
+				arg-currentCurrency="{$currentCurrency}"
+				arg-route="mjc-credits/events/bulk-delete"
+				arg-routeData="{{ [] }}"/>
+		</div>
+		<xf:macro id="filter_macros::quick_filter" arg-key="mjc-event" arg-class="block-outer-opposite" />
+	</div>
+	<div class="block-container">
+		<xf:if is="$events is not empty">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:macro id="event_list" arg-events="{$events}" arg-conditions="{$conditions}" />
+				</xf:datalist>
+			</div>
+			<xf:hiddenval name="currency_id">{$currentCurrency.currency_id}</xf:hiddenval>
+
+			<div class="block-footer block-footer--split">
+				<span class="block-footer-counter">{{ display_totals($transactions, $total) }}</span>
+				<span class="block-footer-select"><xf:checkbox standalone="true"><xf:option check-all="< .block-container" label="{{ phrase('select_all') }}" /></xf:checkbox></span>
+				<span class="block-footer-controls">
+					<xf:button type="submit" name="delete_events" icon="delete" />
+				</span>
+			</div>
+		<xf:else />
+			<div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+		</xf:if>
+	</div>
+</xf:form>
+
+<xf:macro id="event_list" arg-events="!" arg-conditions="!">
+	<xf:datarow rowtype="header">
+		<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+		<xf:cell>{{ phrase('mjc_id') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_event_definition') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_event') }}</xf:cell>
+		<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+	</xf:datarow>
+
+	<xf:foreach loop="$events" value="$event">
+		<xf:datarow>
+			<xf:toggle name="event_ids[]" value="{$event.event_id}" />
+			<xf:cell>#{$event.event_id}</xf:cell>
+			<xf:cell>{$event.definition_id}</xf:cell>
+			<xf:cell class="dataList-cell--main" hash="{$event.event_id}">
+				<a href="{{ link('mjc-credits/events/edit', $event) }}">{$event.title}</a>
+				<span class="dataList-hint" dir="auto">{$event.description}</span>
+			</xf:cell>
+			<xf:delete href="{{ link('mjc-credits/events/delete', $event) }}" />
+		</xf:datarow>
+	</xf:foreach>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_event_definition_chooser" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_choose_event_definition') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/events/add') }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:selectrow label="{{ phrase('mjc_event_definition') }}" name="definition_id">
+				<xf:option />
+				<xf:options source="{$eventDefinitions}" />
+			</xf:selectrow>
+		</div>
+		<xf:hiddenval name="currency_id">{$currencyId}</xf:hiddenval>
+		<xf:submitrow submit="{{ phrase('mjc_add_event') }}" icon="add" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_definition_delete" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/events/definitions/delete', $eventDefinition) }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+				<strong><a href="{{ link('mjc-credits/definitions/edit', $eventDefinition) }}">{$eventDefinition.definition_id}</a></strong>
+			</xf:inforow>
+		</div>
+		<xf:submitrow rowtype="simple" icon="delete" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_definition_edit" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:if is="$eventDefinition.isInsert()">
+	<xf:title>{{ phrase('mjc_add_event_definition') }}</xf:title>
+<xf:else />
+	<xf:title>{{ phrase('mjc_edit_event_definition:') }} {$eventDefinition.title}</xf:title>
+</xf:if>
+
+<xf:pageaction if="$eventDefinition.isUpdate()">
+	<xf:button href="{{ link('mjc-credits/events/definitions/delete', $eventDefinition) }}" icon="delete" overlay="true" />
+</xf:pageaction>
+
+<xf:form action="{{ link('mjc-credits/events/definitions/save', $eventDefinition) }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:textboxrow name="definition_id" value="{$eventDefinition.definition_id}"
+				maxlength="{{ max_length($eventDefinition, 'definition_id') }}"
+				label="{{ phrase('definition_id') }}" />
+
+			<xf:textboxrow name="title" value="{{ $eventDefinition.definition_id ? $eventDefinition.MasterTitle.phrase_text : '' }}"
+				label="{{ phrase('title') }}" />
+
+			<xf:textarearow name="description" value="{{ $eventDefinition.definition_id ? $eventDefinition.MasterDescription.phrase_text : '' }}" autosize="true"
+				label="{{ phrase('description') }}" />
+
+			<xf:textboxrow name="definition_class" value="{$eventDefinition.definition_class}"
+				maxlength="{{ max_length($eventDefinition, 'definition_class') }}"
+				label="{{ phrase('definition_class') }}"
+				explain="{{ phrase('mjc_definition_class_explain') }}" />
+
+			<xf:numberboxrow name="display_order" value="{$eventDefinition.display_order}" type="number" min="0" step="5"
+				label="{{ phrase('display_order') }}" />
+
+			<xf:macro template="addon_macros" name="addon_edit" arg-addOnId="{$eventDefinition.addon_id}" />
+		</div>
+		<xf:submitrow sticky="true" icon="save" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_definition_list" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_event_definitions') }}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('mjc-credits/events/definitions/add') }}" icon="add">{{ phrase('mjc_add_event_definition') }}</xf:button>
+</xf:pageaction>
+
+<xf:if is="$eventDefinitions is not empty">
+	<div class="block">
+		<div class="block-outer">
+			<xf:macro template="filter_macros" name="quick_filter" arg-key="event-definitions" arg-class="block-outer-opposite" />
+		</div>
+		<div class="block-container">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:foreach loop="$eventDefinitions" value="$eventDefinition">
+						<xf:datarow
+							hash="{$eventDefinition.definition_id}"
+							label="{$eventDefinition.title}"
+							hint="{$eventDefinition.description}"
+							href="{{ link('mjc-credits/events/definitions/edit', $eventDefinition) }}"
+							delete="{{ link('mjc-credits/events/definitions/delete', $eventDefinition) }}">
+							<xf:cell class="dataList-cell--min">{$eventDefinition.definition_id}</xf:cell>
+							<xf:action href="{{ link('mjc-credits/events/add', null, {'definition_id': $eventDefinition.definition_id}) }}">
+								{{ phrase('mjc_add_event') }}
+							</xf:action>
+							<xf:cell class="dataList-cell--min dataList-cell--hint">{$eventDefinition.display_order}</xf:cell>
+						</xf:datarow>
+					</xf:foreach>
+				</xf:datalist>
+			</div>
+			<div class="block-footer">
+				<span class="block-footer-counter">{{ display_totals($eventDefinitions) }}</span>
+			</div>
+		</div>
+	</div>
+<xf:else />
+	<div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+</xf:if>]]></template>
+  <template type="admin" title="mjc_event_delete" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/events/delete') }}" class="block" ajax="true">
+
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				<xf:if is="$event">
+					{{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+					<strong><a href="{{ link('mjc-credits/events/edit', $event) }}">{$event.title}</a></strong>
+				<xf:else />
+					{{ phrase('mjc_please_confirm_that_you_want_to_delete_x_events', {'number': count($eventIds)}) }}
+				</xf:if>
+			</xf:inforow>
+		</div>
+
+		<xf:submitrow rowtype="simple" icon="delete" />
+	</div>
+
+	<xf:foreach loop="$eventIds" value="$eventId">
+		<xf:hiddenval name="event_ids[]">{$eventId}</xf:hiddenval>
+	</xf:foreach>
+
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_edit" version_id="1020700" version_string="1.2.7"><![CDATA[<xf:if is="$event.isInsert()">
+	<xf:title>{{ phrase('mjc_add_event') }}</xf:title>
+<xf:else />
+	<xf:title>{{ phrase('mjc_edit_event:') }} {$event.title}</xf:title>
+</xf:if>
+
+<xf:pageaction if="$event.isUpdate()">
+	<xf:button href="{{ link('mjc-credits/events/delete', $event) }}" icon="delete" overlay="true" />
+</xf:pageaction>
+
+<xf:form action="{{ link('mjc-credits/events/save', $event) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:macro template="mjc_event_edit_macros" name="event_definition"
+				arg-event="{$event}"
+				arg-eventDefinition="{$eventDefinition}" />
+
+			<xf:textboxrow name="title" value="{{ $event.event_id ? $event.MasterTitle.phrase_text : '' }}"
+				label="{{ phrase('title') }}"
+				hint="{{ phrase('optional') }}"
+				explain="{{ phrase('mjc_event_title_explain') }}" />
+
+			<xf:textboxrow name="description" value="{{ $event.event_id ? $event.MasterDescription.phrase_text : '' }}"
+				label="{{ phrase('description') }}"
+				hint="{{ phrase('optional') }}"
+				explain="{{ phrase('mjc_event_description_explain') }}" />
+
+			<xf:macro template="mjc_event_edit_macros" name="currency"
+				arg-event="{$event}" />
+
+			<hr class="formRowSep" />
+
+			<xf:macro template="mjc_event_edit_macros" name="active"
+				arg-event="{$event}" />
+
+			<hr class="formRowSep" />
+			<xf:if is="!{$handlerOptions.hideAmountField}">
+				<xf:macro template="mjc_event_edit_macros" name="amount"
+					arg-event="{$event}" />
+			</xf:if>
+			
+			<xf:if is="{{ $event.definition_id == 'daily_login' }}">
+				<xf:macro template="mjc_event_edit_macros" name="rand"
+					arg-event="{$event}" />
+			</xf:if>
+				
+			<xf:if is="{$handlerOptions.hasFeeOptions}">
+				<xf:macro template="mjc_event_edit_macros" name="tax_and_fee"
+					arg-event="{$event}" />
+			</xf:if>
+
+			<xf:if is="{$handlerOptions.hasForumOptions} && {$forumOptions}">
+				<xf:macro template="mjc_event_edit_macros" name="forums"
+					arg-event="{$event}" arg-forumOptions="{$forumOptions}" />
+			</xf:if>
+
+			{$event.renderEdit('after_amount')|raw}
+		</div>
+
+		<xf:macro template="mjc_event_edit_macros" name="advanced_options"
+			arg-event="{$event}" />
+		<xf:hiddenval name="definition_id">{$event.definition_id}</xf:hiddenval>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_edit_attachment" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:textarearow name="options[extensions]" value="{$event.options.extensions}" autosize="true"
+	label="{{ phrase('mjc_allowed_attachment_file_extensions') }}"
+	explain="{{ phrase('mjc_event_attachment_extension_explain') }}" />]]></template>
+  <template type="admin" title="mjc_event_edit_fee" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:numberboxrow name="options[fee]" value="{{ $event.options.fee + 0 }}" min="0"
+	label="{{ phrase('mjc_fee') }}" />
+<xf:numberboxrow name="options[tax]" value="{{ $event.options.tax + 0 }}" min="0" max="100" units="%"
+	label="{{ phrase('mjc_tax') }}" />]]></template>
+  <template type="admin" title="mjc_event_edit_macros" version_id="1020700" version_string="1.2.7"><![CDATA[<xf:macro name="event_definition"
+	arg-event="!"
+	arg-eventDefinition="!">
+	<xf:formrow label="{{ phrase('mjc_event_definition') }}"
+		explain="{$eventDefinition.description}">
+		{$eventDefinition.title}
+	</xf:formrow>
+</xf:macro>
+
+<xf:macro name="currency"
+	arg-event="!">
+	<xf:if is="!$event.event_id">
+		<xf:macro template="mjc_currency_macros" name="currency_edit" arg-currencyId="{$event.currency_id}" arg-includeEmpty="{{ false }}" />
+	<xf:else />
+		<xf:formrow label="{{ phrase('mjc_currency') }}">
+			{$event.Currency.title}
+		</xf:formrow>
+	</xf:if>
+</xf:macro>
+
+<xf:macro name="active"
+	arg-event="!">
+	<xf:checkboxrow>
+		<xf:option name="active" value="1" selected="$event.active">{{ phrase('enabled') }}</xf:option>
+	</xf:checkboxrow>
+</xf:macro>
+
+<xf:macro name="amount"
+	arg-event="!">
+	<xf:numberboxrow name="amount" value="{{ $event.amount + 0}}" step="any"
+		label="{{ phrase('mjc_amount') }}"
+		explain="{{ phrase('mjc_amount_explain') }}" />
+</xf:macro>
+
+<xf:macro name="rand"
+	arg-event="!">
+		<xf:checkboxrow name="options[type]" label="{{ phrase('mjc_rand_options') }}" 
+				 value="{$event.options.type}" 
+				 required="true">
+			<xf:option value="rand" label="{{ phrase('mjc_rand_on') }}">
+			<xf:numberbox name="options[rand]" value="{{ $event.options.rand + 0}}" step="any" min="0"
+				units="{{ phrase('mjc_rand_amount_explain') }}" />
+			<xf:numberbox name="options[min_rand]" value="{{ $event.options.min_rand + 0}}" step="any" min="0"
+				units="{{ phrase('mjc_min_rand_amount_explain') }}" />		
+		</xf:option>
+	</xf:checkboxrow>
+</xf:macro>
+
+<xf:macro name="advanced_options"
+	arg-event="!">
+	<h3 class="block-formSectionHeader">
+		<span class="block-formSectionHeader-aligner">{{ phrase('mjc_advanced_options') }}</span>
+	</h3>
+	<div class="block-body">
+		<xf:checkboxrow>
+			<xf:option name="moderate_transactions" value="1" selected="$event.moderate_transactions">
+				{{ phrase('mjc_moderate_debit_transactions') }}
+			</xf:option>
+			<xf:option name="send_alert" value="1" selected="$event.send_alert">{{ phrase('mjc_send_alert') }}</xf:option>
+		</xf:checkboxrow>
+		<xf:macro template="helper_user_group_edit" name="checkboxes"
+			arg-selectedUserGroups="{{ $event.event_id ? $event.allowed_user_group_ids : [-1] }}" />
+	</div>
+</xf:macro>
+
+<xf:macro name="tax_and_fee"
+	arg-event="!">
+	<xf:numberboxrow name="options[fee]" value="{{ $event.options.fee + 0 }}" step="any" min="0"
+		label="{{ phrase('mjc_fee') }}" />
+	<xf:numberboxrow name="options[tax]" value="{{ $event.options.tax + 0 }}" step="any" min="0" max="100" units="%"
+		label="{{ phrase('mjc_tax') }}" />
+</xf:macro>
+
+<xf:macro name="forums"
+	arg-event="!" arg-forumOptions="!">
+	<xf:selectrow name="options[node_ids]" value="{$event.options.node_ids}" id="js-mjcNodeList"
+		label="{{ phrase('mjc_applicable_forums') }}"
+		multiple="true" size="15" >
+
+		<xf:option value="0">{{ phrase('(all)') }}</xf:option>
+		<xf:foreach loop="$forumOptions" value="$forum">
+			<xf:option value="{$forum.value}" disabled="{$forum.disabled}" label="{$forum.label}" />
+		</xf:foreach>
+	</xf:selectrow>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_event_export" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_export_events') }}</xf:title>
+
+<xf:set var="$addOnRepo" value="{{ $xf.app.em.getRepository('XF:AddOn') }}" />
+
+<xf:form action="{{ link('mjc-credits/events/export') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:macro id="mjc_currency_macros::currency_edit" arg-includeEmpty="{{ false }}" />
+
+			<xf:selectrow label="{{ phrase('mjc_event_definition') }}" name="definition_ids" multiple="true" size="15">
+				<xf:option>{{ phrase('(all)') }}</xf:option>
+				<xf:options source="{$eventDefinitions}" />
+			</xf:selectrow>
+
+			<xf:selectrow name="addon_id"
+				label="{{ phrase('export_from_add_on') }}">
+
+				<xf:option>{{ phrase('(all)') }}</xf:option>
+
+				<xf:foreach loop="$addOnRepo.findAddOnsForList().fetch()" value="$addOn">
+					<xf:option value="{$addOn.addon_id}" label="{$addOn.title}" />
+				</xf:foreach>
+			</xf:selectrow>
+		</div>
+		<xf:submitrow icon="export" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_import" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_import_events') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/events/import') }}" upload="true" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:uploadrow name="upload" accept=".xml"
+				label="{{ phrase('import_from_uploaded_xml_file') }}" />
+
+			<xf:selectrow label="{{ phrase('mjc_event_definition') }}::definition_ids" multiple="true" size="15">
+				<xf:option>{{ phrase('(all)') }}</xf:option>
+				<xf:options source="{$eventDefinitions}" />
+			</xf:selectrow>
+
+			<xf:macro id="mjc_currency_macros::currency_edit"
+				arg-includeEmpty="{{ false }}"
+				arg-currencyId="{$currencyId}" />
+		</div>
+		<xf:submitrow icon="import" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_event_list" version_id="1020800" version_string="1.2.8"><![CDATA[<xf:title>{{ phrase('mjc_events') }}</xf:title>
+
+<xf:pageaction>
+	<div class="buttonGroup">
+		<xf:button href="{{ link('mjc-credits/events/add', null, {'currency_id': $currentCurrency.currency_id}) }}" icon="add" overlay="true">{{ phrase('mjc_add_event') }}</xf:button>
+
+		<div class="buttonGroup-buttonWrapper">
+			<xf:button class="menuTrigger" data-xf-click="menu" aria-expanded="false" aria-haspopup="true" title="{{ phrase('more_options')|for_attr }}">&#8226;&#8226;&#8226;</xf:button>
+			<div class="menu" data-menu="menu" aria-hidden="true">
+				<div class="menu-content">
+					<h4 class="menu-header">{{ phrase('more_options') }}</h4>
+					<a href="{{ link('mjc-credits/events/import', null, {'currency_id': $currentCurrency.currency_id}) }}" class="menu-linkRow">{{ phrase('button.import') }}</a>
+					<a href="{{ link('mjc-credits/events/export', null, {'currency_id': $currentCurrency.currency_id}) }}" class="menu-linkRow">{{ phrase('button.export') }}</a>
+					<a href="{{ link('mjc-credits/events/bulk-delete', null, {'currency_id': $currentCurrency.currency_id}) }}" class="menu-linkRow">{{ phrase('button.delete') }}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</xf:pageaction>
+
+<xf:css>
+	.dataList-row.is-disabled .dataList-cell{
+	  opacity: 0.5;
+	}
+	.dataList-row.is-disabled .dataList-cell--main .dataList-mainRow a {
+	  text-decoration: line-through;
+	}
+</xf:css>
+
+<xf:form action="{{ link('mjc-credits/events/update') }}" class="block" ajax="true">
+	<div class="block-outer">
+		<div class="block-outer-main">
+			<xf:macro template="mjc_currency_macros" name="currency_change_menu"
+				arg-currencies="{$currencies}"
+				arg-currentCurrency="{$currentCurrency}"
+				arg-route="mjc-credits/events"
+				arg-routeData="{{ [] }}"/>
+		</div>
+		<xf:macro template="filter_macros" name="quick_filter" arg-key="mjc-event" arg-class="block-outer-opposite" />
+	</div>
+	<div class="block-container">
+		<xf:if is="$events is not empty">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:macro name="event_list" arg-events="{$events}" arg-conditions="{$conditions}" />
+				</xf:datalist>
+			</div>
+			<xf:hiddenval name="currency_id">{$currentCurrency.currency_id}</xf:hiddenval>
+			<xf:submitrow icon="save" sticky="true" />
+		<xf:else />
+			<div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+		</xf:if>
+	</div>
+</xf:form>
+
+<xf:macro name="event_list" arg-events="!" arg-conditions="!">
+	<xf:datarow rowtype="header">
+		<xf:cell>{{ phrase('mjc_event') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_amount') }}</xf:cell>
+		<xf:cell class="dataList-cell--min">
+			<label class="iconic iconic--checkbox iconic--labelled">
+				<input type="checkbox" name="" value="1"
+					data-xf-init="check-all"
+					data-match=".event-active input:checkbox" />
+				<i aria-hidden="true"></i> {{ phrase('mjc_active') }}</label>
+		</xf:cell>
+		<xf:cell class="dataList-cell--min">
+			<label class="iconic iconic--checkbox iconic--labelled">
+				<input type="checkbox" name="" value="1"
+					data-xf-init="check-all"
+					data-match=".event-alert input:checkbox" />
+				<i aria-hidden="true"></i> {{ phrase('mjc_send_alert') }}</label>
+		</xf:cell>
+		<xf:cell class="dataList-cell--min">
+			<label class="iconic iconic--checkbox iconic--labelled">
+				<input type="checkbox" name="" value="1"
+					data-xf-init="check-all"
+					data-match=".event-moderate input:checkbox" />
+				<i aria-hidden="true"></i> {{ phrase('mjc_moderate') }}</label>
+		</xf:cell>
+		<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+	</xf:datarow>
+
+	<xf:foreach loop="$events" value="$event">
+		<xf:datarow rowclass="{{ !$event.active ? ' is-disabled' : '' }}">
+			<xf:cell class="dataList-cell--main" hash="{$event.event_id}">
+				<div class="dataList-mainRow">
+					<a href="{{ link('mjc-credits/events/edit', $event) }}">{$event.title}</a>
+					<span class="dataList-hint" dir="auto">{$event.description}</span>
+				</div>
+				<div class="dataList-subRow">
+					<ul class="listInline listInline--bullet">
+						<li><a href="{{ link('mjc-credits/events/edit', $event) }}" data-xf-init="tooltip" title="{{ phrase('mjc_edit') }}"><i class="fa fa-pencil" aria-hidden="true"></i> {{ phrase('mjc_edit') }}</a></li>
+						<li><a href="{{ link('mjc-credits/transactions', null, {'event_id': {$event.event_id}}) }}" data-xf-init="tooltip" title="{{ phrase('mjc_transactions') }}"><i class="fa fa-list-alt" aria-hidden="true"></i> {{ phrase('mjc_transactions') }}</a></li>
+					</ul>
+				</div>
+			</xf:cell>
+
+			<xf:cell>
+				<xf:if is="!{{ $event.handler && $event.handler.getHandlerOption('hideAmountField') }}">
+					<xf:numberbox name="events[{$event.event_id}][amount]" value="{{ $event.amount + 0}}"
+						label="{{ phrase('mjc_amount') }}"
+						explain="{{ phrase('mjc_amount_explain') }}"
+						class="input--numberNarrow" />
+				</xf:if>
+			</xf:cell>
+
+			<xf:toggle name="events[{$event.event_id}][active]"
+				value="1"
+				selected="$event.active"
+				class="dataList-cell--separated event-active" />
+			<xf:toggle name="events[{$event.event_id}][send_alert]"
+				value="1"
+				selected="$event.send_alert"
+				class="dataList-cell--separated event-alert" />
+			<xf:toggle name="events[{$event.event_id}][moderate_transactions]"
+				value="1"
+				selected="$event.moderate_transactions"
+				class="dataList-cell--separated event-moderate" />
+			<xf:delete href="{{ link('mjc-credits/events/delete', $event) }}" />
+		</xf:datarow>
+	</xf:foreach>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_import" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_import_credits') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/import') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:selectrow label="{{ phrase('import_from') }}" name="importer">
+				<xf:option></xf:option>
+				<xf:option value="AdCredits">{{ phrase('mjc_import_ad_credit') }}</xf:option>
+				<xf:option value="DBTechCredits">{{ phrase('mjc_import_dbtech_credits') }}</xf:option>
+				<xf:option value="BrCredits">{{ phrase('mjc_import_brivium_credits') }}</xf:option>
+				<xf:option value="Trophy">{{ phrase('trophy_points') }}</xf:option>
+			</xf:selectrow>
+		</div>
+		<xf:submitrow submit="{{ phrase('continue...') }}" icon="import" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_import_confirm" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_import_credits') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/import-confirm') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:numberboxrow name="batch" value="100" min="1"
+				label="{{ phrase('items_to_process_per_page') }}" />
+		</div>
+		<xf:if is="{$importer} == 'AdCredits'">
+			<xf:foreach loop="$sourceCurrencies" key="$currencyId" value="$sourceCurrency">
+				<xf:macro id="import_currency"
+					arg-currencyId="{$currencyId}"
+					arg-currencyName="{$sourceCurrency.name}"
+					arg-extraName=" ({{ phrase('mjc_import_ad_credit') }})" />
+			</xf:foreach>
+		<xf:elseif is="$importer == 'DBTechCredits'" />
+			<xf:foreach loop="$sourceCurrencies" key="$currencyId" value="$sourceCurrency">
+				<xf:macro id="import_currency"
+					arg-currencyId="{$currencyId}"
+					arg-currencyName="{$sourceCurrency.title}"
+					arg-extraName=" ({{ phrase('mjc_import_dbtech_credits') }})" />
+			</xf:foreach>
+		<xf:elseif is="$importer == 'BrCredits'" />
+			<xf:foreach loop="$sourceCurrencies" key="$currencyId" value="$sourceCurrency">
+				<xf:macro id="import_currency"
+					arg-currencyId="{$currencyId}"
+					arg-currencyName="{$sourceCurrency.title}"
+					arg-extraName=" ({{ phrase('mjc_import_brivium_credits') }})" />
+			</xf:foreach>
+		<xf:elseif is="$importer == 'Trophy'" />
+			<xf:macro id="import_currency"
+				arg-currencyId="trophy"
+				arg-currencyName="{{ phrase('trophy_points') }}" />
+		</xf:if>
+
+		<xf:hiddenval name="importer">{$importer}</xf:hiddenval>
+		<xf:submitrow submit="{{ phrase('mjc_import') }}" icon="import" />
+	</div>
+</xf:form>
+
+<xf:macro id="import_currency"
+	arg-currencyId="!"
+	arg-currencyName="!"
+	arg-extraName="">
+	<h3 class="block-formSectionHeader">
+		<span class="block-formSectionHeader-aligner">{{ phrase('mjc_source_currency:') }}</span>
+		<span class="u-dimmed">{$currencyName}{$extraName}</span>
+	</h3>
+	<div class="block-body">
+		<xf:formrow rowtype="input"
+			label="{{ phrase('mjc_target_currency') }}">
+			<xf:macro id="mjc_currency_macros::currency_edit"
+				arg-inputName="import_data[{$currencyId}][target_currency_id]"
+				arg-row="{{ false }}" />
+		</xf:formrow>
+		<xf:macro id="import_type" arg-currencyId="{$currencyId}" />
+		<xf:checkboxrow explain="{{ phrase('mjc_remove_source_balance_explain') }}">
+			<xf:option name="import_data[{$currencyId}][remove_source]" value="1">
+				{{ phrase('mjc_remove_source_balance') }}
+			</xf:option>
+		</xf:checkboxrow>
+	</div>
+</xf:macro>
+
+<xf:macro id="import_type" arg-currencyId="!">
+	<xf:radiorow name="import_data[{$currencyId}][import_type]" value="override"
+		label="{{ phrase('mjc_import_type') }}">
+		<xf:option value="override">{{ phrase('mjc_override_credits') }}</xf:option>
+		<xf:option value="merge">{{ phrase('mjc_merge_credits') }}</xf:option>
+	</xf:radiorow>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_reset" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_reset') }}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('mjc-credits/transactions/clear') }}" overlay="true" icon="delete">{{ phrase('mjc_clear_all_transactions') }}</xf:button>
+	<xf:button href="{{ link('mjc-credits/clear') }}" overlay="true" icon="delete">{{ phrase('mjc_clear_all_user_credits') }}</xf:button>
+</xf:pageaction>
+
+<xf:form action="{{ link('mjc-credits/reset-confirm') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:macro id="mjc_currency_macros::currency_edit"
+				arg-currencyId="0"
+				arg-includeEmpty="{{ false }}"
+				arg-includeAny="{{ true }}" />
+			<xf:checkboxrow>
+				<xf:option name="reset_credits" value="1" label="{{ phrase('mjc_reset_users_credits_to:') }}">
+					<xf:dependent>
+						<xf:numberbox name="credit_target" value="0" />
+					</xf:dependent>
+				</xf:option>
+				<xf:option name="reset_transactions" value="1" label="{{ phrase('mjc_delete_transactions') }}" />
+			</xf:checkboxrow>
+			<hr class="formRowSep" />
+		</div>
+
+		<h2 class="block-formSectionHeader"><span class="block-formSectionHeader-aligner">{{ phrase('user_criteria') }}</span></h2>
+		<div class="block-body">
+			<xf:include template="helper_user_search_criteria" />
+		</div>
+
+		<xf:submitrow submit="{{ phrase('proceed...') }}" sticky="true" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_reset_confirm" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_reset') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/reset-process') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('mjc_currency') }}">
+				<xf:if is="$currency">
+					{$currency.title}
+				<xf:else />
+					{{ phrase('mjc_all_currencies') }}
+				</xf:if>
+			</xf:formrow>
+			<xf:if is="{$resetData.reset_credits}">
+				<xf:formrow label="{{ phrase('mjc_reset_users_credits_to') }}">
+					{$resetData.credit_target|number}
+				</xf:formrow>
+			</xf:if>
+			<xf:if is="{$resetData.reset_transactions}">
+				<xf:formrow label="{{ phrase('mjc_delete_transactions') }}">
+					{{ phrase('yes') }}
+				</xf:formrow>
+			</xf:if>
+			<xf:formrow label="{{ phrase('number_of_users_matching_criteria') }}">
+				{$total|number}
+				<span role="presentation" aria-hidden="true">&middot;</span>
+				<a href="{{ link('users/list', null, {'criteria': $criteria}) }}">{{ phrase('view_full_list') }}</a>
+			</xf:formrow>
+		</div>
+		<xf:submitrow submit="{{ phrase('reset') }}" />
+	</div>
+
+	<xf:hiddenval name="json_criteria">{$criteria|json}</xf:hiddenval>
+
+	<xf:hiddenval name="currency_id">{$resetData.currency_id}</xf:hiddenval>
+	<xf:hiddenval name="reset_credits">{$resetData.reset_credits}</xf:hiddenval>
+
+	<xf:hiddenval name="reset_transactions">{$resetData.reset_transactions}</xf:hiddenval>
+	<xf:hiddenval name="credit_target">{$resetData.credit_target}</xf:hiddenval>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_send_credits" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_send_credits') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/transfer-confirm') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:macro id="mjc_currency_macros::currency_edit"
+				arg-currencyId="0"
+				arg-includeEmpty="{{ false }}"
+				arg-includeAny="{{ true }}" />
+			<xf:checkboxrow>
+				<xf:option name="reset_credits" value="1" label="{{ phrase('mjc_reset_users_credits_to:') }}">
+					<xf:dependent>
+						<xf:numberbox name="credit_target" value="0" />
+					</xf:dependent>
+				</xf:option>
+				<xf:option name="reset_transactions" value="1" label="{{ phrase('mjc_delete_transactions') }}" />
+			</xf:checkboxrow>
+			<hr class="formRowSep" />
+		</div>
+
+		<h2 class="block-formSectionHeader"><span class="block-formSectionHeader-aligner">{{ phrase('user_criteria') }}</span></h2>
+		<div class="block-body">
+			<xf:include template="helper_user_search_criteria" />
+		</div>
+
+		<xf:submitrow submit="{{ phrase('proceed...') }}" sticky="true" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_stats" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('statistics') }}</xf:title>
+
+<xf:css src="public:chartist.css" />
+<xf:css src="stats.less" />
+<xf:css>
+	.mjcStats{
+		width: 50%;
+		display: inline-block;
+		vertical-align: top;
+	}
+	.amountCell{
+		text-align: right;
+	}
+</xf:css>
+
+<xf:js src="mj/mjc/stats.js" />
+<xf:js prod="xf/stats-compiled.js" dev="vendor/chartist/chartist.min.js, xf/stats.js" />
+<div class="statsOuter">
+	<div class="block ">
+		<div class="block-container">
+			<h2 class="block-header">
+					{{ phrase('mjc_board_statistics') }}
+			</h2>
+			<div class="block-body">
+				<xf:foreach loop="$totalWallets" key="$currencyId" value="$walletAmount">
+					<xf:formrow label="{{ phrase('mjc_total_x', {'currency': {$currencyPhrased.{$currencyId}}})}}">
+						{$walletAmount.total|mjc_currency($currencyId)}
+					</xf:formrow>
+				</xf:foreach>
+				<xf:formrow label="{{ phrase('mjc_total_transactions') }}">
+					<a href="{{ link('mjc-credits/transactions') }}">{$boardStatistics.total_transactions|number}</a>
+				</xf:formrow>
+				<xf:formrow label="{{ phrase('mjc_pending_transactions') }}">
+					<a href="{{ link('mjc-credits/transactions', null, {'transaction_status': 'pending'}) }}">{$boardStatistics.pending_transactions|number}</a>
+				</xf:formrow>
+				<xf:if is="{$boardStatistics.first_transaction_date}">
+					<xf:formrow label="{{ phrase('mjc_first_transaction_date') }}">
+						<xf:date time="{$boardStatistics.first_transaction_date}" />
+					</xf:formrow>
+				</xf:if>
+				<xf:if is="{$boardStatistics.first_transaction_date}">
+					<xf:formrow label="{{ phrase('mjc_last_transaction_date') }}">
+						<xf:date time="{$boardStatistics.last_transaction_date}" />
+					</xf:formrow>
+				</xf:if>
+			</div>
+		</div>
+	</div>
+	<xf:if is="$hasWallet">
+		<div class="block">
+			<div class="block-container">
+				<h2 class="block-header">
+					{{ phrase('mjc_wallet_statistics') }}
+				</h2>
+				<div class="block-body">
+					<div class="mjcStats">
+						<h3 class="block-header">
+							{{ phrase('mjc_by_quantity') }}
+						</h3>
+						<div class=" wallet-stats" data-xf-init="mjc-stats">
+							<script class="js-statsData" type="application/json">
+								{$totalWallets|json|raw}
+							</script>
+							<script class="js-statsSeriesLabels" type="application/json">
+								{$currencyPhrased|json|raw}
+							</script>
+							<div class="ct-chart ct-major-tenth js-statsChart"></div>
+							<ul class="ct-legend js-statsLegend"></ul>
+						</div>
+					</div><div class="mjcStats">
+						<h3 class="block-header">
+							{{ phrase('mjc_by_value') }}
+						</h3>
+						<div class=" wallet-stats" data-xf-init="mjc-stats">
+							<script class="js-statsData" type="application/json">
+								{$totalValueWallets|json|raw}
+							</script>
+							<script class="js-statsSeriesLabels" type="application/json">
+								{$currencyPhrased|json|raw}
+							</script>
+							<div class="ct-chart ct-major-tenth js-statsChart"></div>
+							<ul class="ct-legend js-statsLegend"></ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</xf:if>
+</div>
+
+<xf:if is="$hasWallet">
+<div class="block">
+	<div class="block-container">
+		<h2 class="block-header">
+			{{ phrase('mjc_richest_statistics') }}
+		</h2>
+		<h2 class="block-tabHeader tabs hScroller" data-xf-init="tabs h-scroller" role="tablist" data-panes=".js-productTabPanes">
+			<span class="hScroller-scroll">
+				<xf:foreach loop="$userStats" key="$currencyId" i="$i" value="$users">
+					<xf:if is="$users is not empty">
+						<a class="tabs-tab{{  $i == 1 ?' is-active': '' }}" role="tab" tabindex="0" data-controls="mjc-richest-{$currencyId}">{$currencyPhrased.{$currencyId}}</a>
+					</xf:if>
+				</xf:foreach>
+			</span>
+		</h2>
+		<ul class="tabPanes js-productTabPanes">
+			<xf:foreach loop="$userStats" key="$currencyId" i="$i" value="$users">
+				<xf:if is="$users is not empty">
+					<li class="{{  $i == 1 ?'is-active': '' }}" role="tabpanel" id="mjc-richest-{$currencyId}">
+						<div class="block-body">
+							<xf:datalist>
+								<xf:foreach loop="$users" value="$user">
+									<xf:datarow>
+										<xf:cell class="dataList-cell--min dataList-cell--image dataList-cell--imageSmall"
+											href="{{ link('users/edit', $user) }}">
+											<xf:avatar user="$user" size="s" href="" />
+										</xf:cell>
+										<xf:main href="{{ link('users/edit', $user) }}" label="{$user.username}"
+											hint="{$user.email}" />
+										<xf:cell class="amountCell">{$user.{$currencies.{$currencyId}.column}|mjc_currency($currencyId)}</xf:cell>
+										<xf:delete href="{{ link('users/delete', $user) }}" />
+									</xf:datarow>
+								</xf:foreach>
+								<xf:if is="$filter AND $total > $perPage">
+									<xf:datarow rowclass="dataList-row--note dataList-row--noHover js-filterForceShow">
+										<xf:cell colspan="3">{{ phrase('more_records_matching_filter_more_specific') }}
+										</xf:cell>
+									</xf:datarow>
+								</xf:if>
+							</xf:datalist>
+						</div>
+					</li>
+				</xf:if>
+			</xf:foreach>
+		</ul>
+	</div>
+</div>
+</xf:if>
+<div class="block">
+	<div class="block-container">
+		<h2 class="block-header">
+			<xf:if is="$grouping == 'daily'">
+				{{ phrase('daily_statistics') }}
+			<xf:elseif is="$grouping == 'weekly'" />
+				{{ phrase('weekly_statistics') }}
+			<xf:elseif is="$grouping == 'monthly'" />
+				{{ phrase('monthly_statistics') }}
+			</xf:if>
+			<div class="block-desc">{{ date($start, 'absolute') }} - {{ date($end, 'absolute') }}</div>
+		</h2>
+		<h3 class="block-header">
+			{{ phrase('mjc_spend') }}
+		</h3>
+		<div class="block-body">
+			<div class="block-row">
+				<div data-xf-init="stats">
+					<script class="js-statsData" type="application/json">
+						{$spendData|json|raw}
+					</script>
+					<script class="js-statsSeriesLabels" type="application/json">
+						{$currencyPhrased|json|raw}
+					</script>
+					<div class="ct-chart ct-major-tenth js-statsChart"></div>
+					<ul class="ct-legend js-statsLegend"></ul>
+				</div>
+			</div>
+			<xf:if is="$grouping != 'daily'">
+				<div class="block-row block-row--minor">
+					{{ phrase('values_represent_daily_averages_within_each_time_period') }}
+				</div>
+			</xf:if>
+		</div>
+		<h3 class="block-header">
+			{{ phrase('mjc_earn') }}
+		</h3>
+		<div class="block-body">
+			<div class="block-row">
+				<div data-xf-init="stats">
+					<script class="js-statsData" type="application/json">
+						{$earnData|json|raw}
+					</script>
+					<script class="js-statsSeriesLabels" type="application/json">
+						{$currencyPhrased|json|raw}
+					</script>
+					<div class="ct-chart ct-major-tenth js-statsChart"></div>
+					<ul class="ct-legend js-statsLegend"></ul>
+				</div>
+			</div>
+			<xf:if is="$grouping != 'daily'">
+				<div class="block-row block-row--minor">
+					{{ phrase('values_represent_daily_averages_within_each_time_period') }}
+				</div>
+			</xf:if>
+		</div>
+	</div>
+</div>
+
+<xf:form action="{{ link('mjc-credits') }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('date_range') }}" rowtype="input">
+				<div class="inputGroup inputGroup--auto">
+					<xf:dateinput name="start" value="{{ date($start, 'Y-m-d') }}" />
+					<span class="inputGroup-text">-</span>
+					<xf:dateinput name="end" value="{{ $endDisplay ? date($endDisplay, 'Y-m-d') : '' }}" />
+					<span class="inputGroup-splitter"></span>
+					<xf:select name="date_preset" class="js-presetChange input--autoSize">
+						<xf:option value="-1">{{ phrase('date_presets:') }}</xf:option>
+						<xf:optgroup>
+							<xf:options source="{$datePresets}" />
+							<xf:option value="1995-01-01">{{ phrase('all_time') }}</xf:option>
+						</xf:optgroup>
+					</xf:select>
+				</div>
+			</xf:formrow>
+
+			<xf:radiorow name="grouping" value="{$grouping}"
+				label="{{ phrase('grouping') }}">
+
+				<xf:option value="daily">{{ phrase('daily') }}</xf:option>
+				<xf:option value="weekly">{{ phrase('weekly') }}</xf:option>
+				<xf:option value="monthly">{{ phrase('monthly') }}</xf:option>
+			</xf:radiorow>
+
+			<xf:checkboxrow name="display_types" value="{$currencyIds}"
+				label="{{ phrase('display_statistics') }}">
+					<xf:options source="{$currencyPhrased}" />
+			</xf:checkboxrow>
+		</div>
+		<xf:submitrow submit="{{ phrase('show') }}" sticky="true" />
+	</div>
+</xf:form>
+
+<xf:js>
+	$(function()
+	{
+		$('.js-presetChange').change(function(e)
+		{
+			var $ctrl = $(this),
+				value = $ctrl.val(),
+				$form = $ctrl.closest('form');
+
+			if (value == -1)
+			{
+				return;
+			}
+
+			$form.find($ctrl.data('start') || 'input[name=start]').val(value);
+			$form.find($ctrl.data('end') || 'input[name=end]').val('');
+			$form.submit();
+		});
+	});
+</xf:js>]]></template>
+  <template type="admin" title="mjc_tools_rebuild" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:set var="$statsBody">
+	<xf:numberboxrow name="options[batch]" value="28" min="1"
+		label="{{ phrase('days_to_process_per_page') }}" />
+
+	<xf:checkboxrow>
+		<xf:option name="options[delete]" value="1"
+			label="{{ phrase('delete_existing_cached_data') }}"
+			hint="{{ phrase('some_data_can_not_be_rebuilt') }}" />
+	</xf:checkboxrow>
+</xf:set>
+<xf:macro template="tools_rebuild" name="rebuild_job"
+	arg-header="[BRC] {{ phrase('mjc_rebuild_daily_statistics') }}"
+	arg-body="{$statsBody}"
+	arg-job="MJ\Credits:Stats" />]]></template>
+  <template type="admin" title="mjc_transaction_clear" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+
+<xf:form action="{{ link('mjc-credits/transactions/clear') }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('mjc_sure_you_want_to_clear_all_transactions') }}
+			</xf:inforow>
+		</div>
+		<xf:submitrow submit="{{ phrase('clear') }}" rowtype="simple" icon="delete" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_transaction_delete" version_id="1000033" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/transactions/delete', null, $conditions) }}" class="block" ajax="true">
+
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				<xf:if is="$transaction">
+					{{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+					<strong><a href="{{ link('mjc-credits/transactions/edit', $transaction) }}">
+					#{$transaction.transaction_id} - {{ phrase('mjc_transaction_x_of_y', {'event': {$transaction.Event.title}, 'user': {$transaction.User.username}}) }}
+				</a></strong>
+				<xf:else />
+					{{ phrase('mjc_please_confirm_that_you_want_to_delete_x_transactions', {'number': count($transactionIds)}) }}
+				</xf:if>
+			</xf:inforow>
+		</div>
+
+		<xf:submitrow rowtype="simple" icon="delete" />
+	</div>
+
+	<xf:foreach loop="$transactionIds" value="$transactionId">
+		<xf:hiddenval name="transaction_ids[]">{$transactionId}</xf:hiddenval>
+	</xf:foreach>
+
+</xf:form>]]></template>
+  <template type="admin" title="mjc_transaction_edit" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_edit_transaction:') }} #{$transaction.transaction_id}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('mjc-credits/transactions/delete', $transaction) }}" icon="delete" overlay="true" />
+</xf:pageaction>
+
+<xf:form action="{{ link('mjc-credits/transactions/save', $transaction) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('mjc_id') }}">
+				{$transaction.transaction_id}
+			</xf:formrow>
+			<xf:radiorow name="transaction_status" value="{$transaction.transaction_status}" label="{{ phrase('mjc_status') }}">
+				<xf:option value="pending">{{ phrase('mjc_transaction_status.pending') }}</xf:option>
+				<xf:option value="completed">{{ phrase('mjc_transaction_status.completed') }}</xf:option>
+				<xf:option value="reverted">{{ phrase('mjc_transaction_status.reverted') }}</xf:option>
+			</xf:radiorow>
+			<xf:checkboxrow>
+				<xf:option name="is_hidden" value="1" selected="$transaction.is_hidden">
+					{{ phrase('mjc_hide_this_transaction') }}
+				</xf:option>
+			</xf:checkboxrow>
+			<xf:formrow label="{{ phrase('mjc_event') }}"
+				explain="{$transaction.Event.description}">
+				{$transaction.title}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_trigger_date') }}">
+				<xf:date time="{$transaction.transaction_date}" />
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_user') }}">
+				{{ $transaction.User.username ?: phrase('unknown_user') }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_trigger_user') }}">
+				{{ $transaction.TriggerUser.username ?: phrase('unknown_user') }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_currency') }}">
+				{{ $transaction.Currency.title }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				{{ mjc_format($transaction.amount, $transaction.currency_id) }}
+			</xf:formrow>
+			<xf:textarearow name="message" value="{$transaction.message}"
+				autosize="true" class="input-productShortDesc"
+				label="{{ phrase('mjc_comment') }}" />
+			<xf:if is="{$transaction.content_link}">
+				<xf:formrow label="{{ phrase('mjc_content') }}">
+					<a href="{$transaction.content_link}" target="_blank" title="">{{ phrase('mjc_view_content') }}</a>
+				</xf:formrow>
+			</xf:if>
+		</div>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_transaction_list" version_id="1040400" version_string="1.4.4"><![CDATA[<xf:title>{{ phrase('mjc_transactions') }}</xf:title>
+
+<xf:css>
+	.amountCell{
+		text-align: right;
+	}
+</xf:css>
+
+<xf:form action="{{ link('mjc-credits/transactions') }}" class="block" ajax="true">
+	<div class="block-container">
+		<xf:macro name="search_menu" arg-conditions="{$conditions}" />
+		<xf:if is="$transactions is not empty">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:macro name="transaction_list" arg-transactions="{$transactions}" arg-conditions="{$conditions}" />
+				</xf:datalist>
+			</div>
+			<div class="block-footer block-footer--split">
+				<span class="block-footer-counter">{{ display_totals($transactions, $total) }}</span>
+				<span class="block-footer-select"><xf:checkbox standalone="true"><xf:option check-all="< .block-container" label="{{ phrase('select_all') }}" /></xf:checkbox></span>
+				<span class="block-footer-controls">
+					<xf:button type="submit" name="delete_transactions" icon="delete" />
+				</span>
+			</div>
+		<xf:else />
+			<div class="block-body block-row">{{ phrase('no_results_found') }}</div>
+		</xf:if>
+	</div>
+	<xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+		link="mjc-credits/transactions" params="{$conditions}"
+		wrapperclass="block-outer block-outer--after"
+	/>
+</xf:form>
+
+<xf:macro name="transaction_list" arg-transactions="!" arg-conditions="!">
+	<xf:datarow rowtype="header">
+		<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+		<xf:cell class="dataList-cell--min">{{ phrase('mjc_id') }}</xf:cell>
+		<xf:cell class="dataList-cell--min">{{ phrase('mjc_status') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_event') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_user') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_trigger_user') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_amount') }}</xf:cell>
+		<xf:cell>{{ phrase('mjc_description') }}</xf:cell>
+		<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+	</xf:datarow>
+	<xf:foreach loop="$transactions" value="$transaction">
+		<xf:datarow>
+			<xf:toggle name="transaction_ids[]" value="{$transaction.transaction_id}" />
+			<xf:cell class="dataList-cell--min">#{$transaction.transaction_id}</xf:cell>
+			<xf:cell class="dataList-cell--min" data-xf-init="tooltip" title="{$transaction.getStatusPhrase()}">
+				<xf:if is="$transaction.transaction_status == 'pending'">
+					<i class="fa fa-clock-o" aria-hidden="true"></i>
+				<xf:elseif is="$transaction.transaction_status == 'completed'" />
+					<i class="fa fa-check" aria-hidden="true"></i>
+				<xf:else />
+					<i class="fa fa-undo" aria-hidden="true"></i>
+				</xf:if>
+			</xf:cell>
+			<xf:cell class="dataList-cell--main" hash="{$transaction.transaction_id}">
+				<a href="{{ link('mjc-credits/transactions/edit', $transaction) }}">{$transaction.title}</a>
+				{{ (!$transaction.Event || !$transaction.EventDefinition) ? '[' .phrase('mjc_deleted_event') . ']' : '' }}
+				<span class="dataList-secondRow">
+					{{ date_time($transaction.transaction_date) }}
+				</span>
+			</xf:cell>
+			<xf:cell>{{ $transaction.User.username ?: phrase('unknown_user') }}</xf:cell>
+			<xf:cell>{{ $transaction.TriggerUser.username ?: phrase('mjc_system') }}</xf:cell>
+			<xf:cell class="dataList-cell--min amountCell">
+				{$transaction.amount|mjc_currency($transaction.currency_id, true)}
+				<span class="dataList-secondRow">{{ $transaction.Currency.title }}</span>
+			</xf:cell>
+			<xf:cell>
+				{{ $transaction.description }}
+				<span class="dataList-secondRow">{{ bb_code($transaction.message, 'mjc_transaction', $transaction) }}</span>
+			</xf:cell>
+			<xf:delete href="{{ link('mjc-credits/transactions/delete', $transaction, $conditions) }}" />
+		</xf:datarow>
+	</xf:foreach>
+</xf:macro>
+
+<xf:macro name="search_menu" arg-conditions="!">
+	<div class="block-filterBar">
+		<div class="filterBar">
+			<a class="filterBar-menuTrigger" data-xf-click="menu" role="button" tabindex="0" aria-expanded="false" aria-haspopup="true">{{ phrase('refine_search') }}</a>
+			<div class="menu menu--wide" data-menu="menu" aria-hidden="true"
+				data-href="{{ link('mjc-credits/transactions/refine-search', null, $conditions) }}"
+				data-load-target=".js-filterMenuBody">
+				<div class="menu-content">
+					<h4 class="menu-header">{{ phrase('refine_search') }}</h4>
+					<div class="js-filterMenuBody">
+						<div class="menu-row">{{ phrase('loading...') }}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</xf:macro>]]></template>
+  <template type="admin" title="mjc_transaction_refine_search" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:form action="{{ link('mjc-credits/transactions') }}">
+<xf:css>
+.dateRangeInput > .inputGroup{
+	width: calc(50% - 2px);
+	float: left;
+}
+</xf:css>
+	<div class="menu-row">
+		{{ phrase('mjc_id:') }}
+		<div class="u-inputSpacer">
+			<xf:textbox name="transaction_id" value="{$conditions.transaction_id}" />
+		</div>
+	</div>
+
+	<div class="menu-row">
+		{{ phrase('mjc_currencies:') }}
+		<div class="u-inputSpacer">
+			<xf:macro template="mjc_currency_macros" name="currency_select"
+				arg-currencies="{$currencies}"
+				arg-currencyId="{$conditions.currency_id}"
+				arg-includeAny="{{ true }}"
+				arg-row="{{ false }}" />
+		</div>
+	</div>
+
+	<div class="menu-row menu-row--separated">
+		{{ phrase('mjc_event_definition:') }}
+		<div class="u-inputSpacer">
+			<xf:select name="definition_id" value="{$conditions.definition_id}">
+				<xf:option />
+				<xf:options source="{$eventDefinitions}" />
+			</xf:select>
+		</div>
+	</div>
+
+	<div class="menu-row">
+		{{ phrase('mjc_user:') }}
+		<div class="u-inputSpacer">
+			<xf:textbox name="username" type="search" value="{$conditions.username}" />
+		</div>
+	</div>
+
+	<div class="menu-row">
+		{{ phrase('mjc_trigger_user:') }}
+		<div class="u-inputSpacer">
+			<xf:textbox name="trigger_username" type="search" value="{$conditions.trigger_username}" />
+		</div>
+	</div>
+
+	<div class="menu-row">
+		{{ phrase('mjc_transaction_status:') }}
+		<div class="u-inputSpacer">
+			<xf:select name="transaction_status" value="{$conditions.transaction_status}">
+				<xf:option value="">{{ phrase('mjc_all') }}</xf:option>
+				<xf:option value="pending">{{ phrase('mjc_pending') }}</xf:option>
+				<xf:option value="completed">{{ phrase('mjc_completed') }}</xf:option>
+				<xf:option value="reverted">{{ phrase('mjc_reverted') }}</xf:option>
+			</xf:select>
+		</div>
+	</div>
+
+	<div class="menu-row menu-row--separated">
+		{{ phrase('sort:') }}
+		<div class="inputPair">
+			<xf:select name="order" value="{$conditions.order}">
+				<xf:option value="transaction_date">{{ phrase('mjc_created_date') }}</xf:option>
+				<xf:option value="amount">{{ phrase('mjc_amount') }}</xf:option>
+				<xf:option value="last_update">{{ phrase('mjc_last_update') }}</xf:option>
+			</xf:select>
+			<xf:select name="direction" value="{$conditions.direction}">
+				<xf:option value="desc">{{ phrase('descending') }}</xf:option>
+				<xf:option value="asc">{{ phrase('ascending') }}</xf:option>
+			</xf:select>
+		</div>
+	</div>
+
+	<div class="menu-row menu-row--separated">
+		{{ phrase('date_range:') }}
+		<div class="inputPair dateRangeInput">
+			<xf:dateinput name="start" value="{{ $conditions.start ? date($conditions.start, 'Y-m-d') : '' }}" />
+			<xf:dateinput name="end" value="{{ $conditions.end ? date($conditions.end, 'Y-m-d') : '' }}" />
+		</div>
+		<div class="u-inputSpacer">
+			<xf:select name="date_preset" class="js-presetChange input--autoSize">
+				<xf:option label="{{ phrase('date_presets:') }}" value="-1" />
+				<xf:optgroup>
+					<xf:options source="{$datePresets}" />
+					<xf:option value="1995-01-01">{{ phrase('all_time') }}</xf:option>
+				</xf:optgroup>
+			</xf:select>
+		</div>
+	</div>
+
+	<div class="menu-footer">
+		<span class="menu-footer-controls">
+			<xf:button type="submit" icon="search" class="button--primary">{{ phrase('refine_search') }}</xf:button>
+		</span>
+	</div>
+	<xf:hiddenval name="search">1</xf:hiddenval>
+</xf:form>
+
+<xf:js>
+	$(function()
+	{
+		$('.js-presetChange').change(function(e)
+		{
+			var $ctrl = $(this),
+			value = $ctrl.val(),
+			$form = $ctrl.closest('form');
+
+			if (value == -1)
+			{
+				return;
+			}
+
+			$form.find($ctrl.data('start') || 'input[name=start]').val(value);
+			$form.find($ctrl.data('end') || 'input[name=end]').val('');
+			$form.submit();
+		});
+	});
+</xf:js>]]></template>
+  <template type="admin" title="mjc_user_edit" version_id="1040500" version_string="1.4.5"><![CDATA[<xf:title>{{ phrase('mjc_user_currency_adjust') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/user-edit', $user) }}" class="block" ajax="true">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:if is="$currencies">
+                <div class="block-body">
+                    <xf:foreach loop="$currencies" value="$currency">
+                        <xf:numberboxrow name="credits[{$currency.currency_id}]"
+                                         value="{{ $user.{$currency.column} + 0 }}"
+                                         label="{$currency.title}"/>
+                    </xf:foreach>
+                </div>
+            </xf:if>
+        </div>
+        <xf:submitrow submit="{{ phrase('mjc_adjust') }}" icon="save"/>
+    </div>
+</xf:form>]]></template>
+  <template type="admin" title="mjc_user_edit_panel" version_id="1030700" version_string="1.3.7"><![CDATA[<h3 class="block-formSectionHeader">
+	<span class="collapseTrigger collapseTrigger--block" data-xf-click="toggle" data-target="< :up:next">
+		<span class="block-formSectionHeader-aligner">{{ phrase('br_credits') }}</span>
+	</span>
+</h3>
+<xf:if is="$currencies">
+	<div class="block-body block-body--collapsible">
+		<xf:foreach loop="$currencies" value="$currency">
+			<xf:numberboxrow name="credits[{$currency.currency_id}]" value="{{ $user.{$currency.column} + 0 }}" step="any"
+							 label="{$currency.title}" />
+		</xf:foreach>
+	</div>
+</xf:if>]]></template>
+  <template type="admin" title="mjc_user_list" version_id="1000033" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('users') }}</xf:title>
+<xf:css>
+	.amountCell{
+		text-align: right;
+	}
+</xf:css>
+<xf:if is="$users is not empty">
+	<xf:form action="{{ link('mjc-credits/users') }}" class="block">
+		<xf:if is="!$showingAll">
+			<div class="block-outer">
+				<div class="block-outer-main">
+					<xf:button class="button--link menuTrigger" data-xf-click="menu" aria-expanded="false" aria-haspopup="true">
+						{{ phrase('sort_by:') }} {{ $sortOptions.{$order} ?: phrase('user_name') }}
+					</xf:button>
+
+					<div class="menu" data-menu="menu" aria-hidden="true">
+						<div class="menu-content">
+							<h3 class="menu-header">{{ phrase('sort_by...') }}</h3>
+							<xf:foreach loop="$sortOptions" key="$sortKey" value="$sortName">
+								<a href="{{ link('mjc-credits/users', null, {'criteria': $criteria, 'order': $sortKey}) }}"
+									class="menu-linkRow {{ $order == $sortKey ? 'is-selected' : '' }}">
+									{$sortName}
+								</a>
+							</xf:foreach>
+						</div>
+					</div>
+				</div>
+				<xf:macro template="filter_macros" name="quick_filter" arg-key="users"
+					arg-ajax="{{ link('mjc-credits/users', null, {'criteria': $criteria}) }}"
+					arg-class="block-outer-opposite" />
+			</div>
+		</xf:if>
+		<div class="block-container">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:if is="$showingAll">
+						<xf:datarow rowtype="header" rowclass="dataList-row--noHover">
+							<xf:if is="$showingAll">
+								<xf:cell colspan="4">
+									<xf:checkbox standalone="true"><xf:option value="{$user.user_id}" check-all=".dataList >" label="{{ phrase('select_all') }}" /></xf:checkbox>
+								</xf:cell>
+							</xf:if>
+						</xf:datarow>
+					</xf:if>
+					<xf:foreach loop="$users" value="$user">
+						<xf:datarow>
+							<xf:if is="$showingAll">
+								<xf:toggle name="user_ids[]" value="{$user.user_id}" selected="true" />
+							</xf:if>
+							<xf:cell class="dataList-cell--min dataList-cell--image dataList-cell--imageSmall"
+								href="{{ link('users/edit', $user) }}">
+								<xf:avatar user="$user" size="s" href="" />
+							</xf:cell>
+							<xf:main href="{{ link('users/edit', $user) }}" label="{$user.username}"
+								hint="{$user.email}" />
+							<xf:foreach loop="$currencies" value="$currency">
+								<xf:cell class="amountCell">{$user.{$currency.column}|mjc_currency($currency.currency_id)}</xf:cell>
+							</xf:foreach>
+							<xf:delete href="{{ link('users/delete', $user) }}" />
+						</xf:datarow>
+					</xf:foreach>
+					<xf:if is="$filter AND $total > $perPage">
+						<xf:datarow rowclass="dataList-row--note dataList-row--noHover js-filterForceShow">
+							<xf:cell colspan="3">{{ phrase('more_records_matching_filter_more_specific') }}
+							</xf:cell>
+						</xf:datarow>
+					</xf:if>
+				</xf:datalist>
+			</div>
+			<div class="block-footer block-footer--split">
+				<span class="block-footer-counter">{{ display_totals($users, $total) }}</span>
+				<xf:if is="$showAll">
+					<span class="block-footer-controls"><a href="{{ link('mjc-credits/users', null, {'criteria': $criteria, 'all': true}) }}">{{
+						phrase('show_all_matches') }}</a></span>
+				<xf:elseif is="$showingAll" />
+					<span class="block-footer-select"><xf:checkbox standalone="true"><xf:option check-all=".dataList" label="{{ phrase('select_all') }}" /></xf:checkbox></span>
+					<span class="block-footer-controls"><xf:button type="submit" accesskey="s">{{ phrase('batch_update') }}</xf:button></span>
+				</xf:if>
+			</div>
+		</div>
+
+		<xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+			link="mjc-credits/users"
+			params="{{ {'criteria': $criteria, 'order': $order, 'direction': $direction} }}"
+			wrapperclass="js-filterHide block-outer block-outer--after" />
+	</xf:form>
+<xf:else />
+	<div class="blockMessage">{{ phrase('no_records_matched') }}</div>
+</xf:if>]]></template>
+  <template type="admin" title="option_template_mjc_credits_navbar" version_id="1020401" version_string="1.2.4"><![CDATA[<xf:set var="$editHtml"><xf:trim>
+	<xf:if is="$option.canEdit()">
+		<xf:macro template="option_macros" name="option_edit_link" arg-group="{$group}" arg-option="{$option}" />
+	</xf:if>
+</xf:trim></xf:set>
+
+<xf:radiorow label="{$option.title}" hint="{$editHtml}" name="{$inputName}[enabled]">
+	<xf:explain>{$explainHtml}</xf:explain>
+
+	<xf:option label="{{ phrase('disabled') }}" value="0" selected="$option.option_value.enabled == '0'" />
+
+	<xf:option label="{{ phrase('default') }}" value="1" selected="$option.option_value.enabled == '1'">
+		<xf:hint>{{ phrase('mjc_credits_enable_navbar_default_explain') }}</xf:hint>
+	</xf:option>
+
+	<xf:option label="{{ phrase('right') }}" value="2" selected="$option.option_value.enabled == '2'">
+		<xf:hint>{{ phrase('mjc_credits_enable_navbar_right_explain') }}</xf:hint>
+		<xf:radio name="{$inputName}[right_position]" value="{{ $option.option_value.right_position ? $option.option_value.right_position : 'end' }}">
+			<xf:option label="{{ phrase('mjc_credits_navbar_right_start') }}" value="start" />
+			<xf:option label="{{ phrase('mjc_credits_navbar_right_middle') }}" value="middle" />
+			<xf:option label="{{ phrase('mjc_credits_navbar_right_end') }}" value="end" />
+		</xf:radio>
+		<xf:checkbox>
+			<xf:option name="{$inputName}[right_text]" value="1" selected="$option.option_value.right_text">
+				{{ phrase('mjc_credits_enable_navbar_text') }}
+			</xf:option>
+		</xf:checkbox>
+	</xf:option>
+	<xf:html>{$listedHtml}</xf:html>
+</xf:radiorow>]]></template>
+  <template type="admin" title="payment_profile_mjc_credits" version_id="1010600" version_string="1.1.6"><![CDATA[<xf:selectrow label="{{ phrase('mjc_credits_currency') }}" name="options[currency_id]" value="{{ $profile.options.currency_id ?: '' }}">
+	<xf:option value="">&nbsp;</xf:option>
+	<xf:options source="$currencies" />
+</xf:selectrow>
+
+<xf:numberboxrow label="{{ phrase('mjc_credits_exchange_rate') }}" name="options[exchange_rate]" value="{{ $profile.options.exchange_rate ?: 1 }}" min="0" step="any">
+	<xf:explain>{{ phrase('mjc_credits_exchange_rate_explain') }}</xf:explain>
+</xf:numberboxrow>]]></template>
+  <template type="admin" title="widget_def_options_mjc_balance" version_id="1040800" version_string="1.4.8"><![CDATA[<hr class="formRowSep" />
+
+<xf:selectrow name="options[currency_ids][]" value="{{ $options.currency_ids ?: 0 }}" multiple="multiple" size="7"
+	label="{{ phrase('mjc_currency_limit') }}"
+	explain="{{ phrase('mjc_only_balance_of_selected_currencies') }}">
+
+	<xf:option value="0">{{ phrase('mjc_all_currencies') }}</xf:option>
+	<xf:foreach loop="$currencies" value="$currency">
+		<xf:option value="{$currency.currency_id}">
+			 {$currency.title}
+		</xf:option>
+	</xf:foreach>
+</xf:selectrow>]]></template>
+  <template type="admin" title="widget_def_options_mjc_clock_in_every_day" version_id="1040800" version_string="1.4.8"><![CDATA[<hr class="formRowSep" />
+
+<xf:selectrow name="options[currency_ids][]" value="{{ $options.currency_ids ?: 0 }}" multiple="multiple" size="4"
+			  label="{{ phrase('mjc_currency_limit') }}"
+			  explain="{{ phrase('mjc_select_the_currency_that_the_user_wants_to_check_in_with') }}">
+
+	<xf:option value="0">{{ phrase('mjc_all_currencies') }}</xf:option>
+	<xf:foreach loop="$currencies" value="$currency">
+		<xf:option value="{$currency.currency_id}">
+			 {$currency.title}
+		</xf:option>
+	</xf:foreach>
+</xf:selectrow>]]></template>
+  <template type="admin" title="widget_def_options_mjc_richest" version_id="1040800" version_string="1.4.8"><![CDATA[<hr class="formRowSep" />
+
+<xf:numberboxrow name="options[limit]" value="{$options.limit}" min="1"
+	label="{{ phrase('maximum_entries') }}" />
+
+<xf:selectrow name="options[currency_ids][]" value="{{ $options.currency_ids ?: '' }}" multiple="multiple" size="7"
+	label="{{ phrase('mjc_currency_currency_to_be_displayed') }}"
+	explain="{{ phrase('mjc_only_richest_members_has_selected_currencies') }}">
+
+	<xf:option value="">{{ phrase('mjc_all_currencies') }}</xf:option>
+	<xf:foreach loop="$currencies" value="$currency">
+		<xf:option value="{$currency.currency_id}">
+			 {$currency.title}
+		</xf:option>
+	</xf:foreach>
+</xf:selectrow>]]></template>
+  <template type="public" title="alert_user_red_envelope_from_alert" version_id="1010300" version_string="1.1.3"><![CDATA[{{ phrase('cnxfans_gave_you_a_red_ennelope', {
+         'name': username_link($user, false, {'defaultname': $alert.username}),
+	     'target':  base_url($extra.targetLink),
+         'thread': prefix('thread', $extra.prefix_id) . $extra.title ,
+		 'title': $extra.title })
+	}}]]></template>
+  <template type="public" title="mjc_alert_event" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:if is="$amount >= 0">
+	{{ phrase('mjc_alert_your_balance_debited_x_for_y', {
+		'amount': '<a href="' . link('mjc-credits/transactions', $content) . '" class="fauxBlockLink-blockLink">' .$amountFormatted . '</a>',
+		'event': $content.title
+	}) }}
+<xf:else />
+	{{ phrase('mjc_alert_your_balance_credited_x_for_y', {
+		'amount': '<a href="' . link('mjc-credits/transactions', $content) . '" class="fauxBlockLink-blockLink">' .$amountFormatted . '</a>',
+		'event': $content.title
+	}) }}
+</xf:if>]]></template>
+  <template type="public" title="mjc_alert_event_transfer" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:if is="$extra.type == 'send'">
+	{{ phrase('mjc_you_sent_x_to_y', {
+		'amount': '<a href="' . link('mjc-credits/transactions', $content) . '" class="fauxBlockLink-blockLink">' .$amountFormatted . '</a>',
+		'name': username_link($receiver)
+	}) }}
+<xf:else />
+	{{ phrase('mjc_x_sent_you_y', {
+		'amount': '<a href="' . link('mjc-credits/transactions', $content) . '" class="fauxBlockLink-blockLink">' .$amountFormatted . '</a>',
+		'name': username_link($sender)
+	}) }}
+</xf:if>]]></template>
+  <template type="public" title="mjc_balance.less" version_id="1000034" version_string="1.0.0"><![CDATA[.block.mjc-balance{
+	.contentRow-header{
+		float: left;
+		font-size: 14px;
+	}
+	.contentRow-title{
+		float: right;
+		font-size: 14px;
+	}
+}]]></template>
+  <template type="public" title="mjc_bonus_create" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('bonus')}">
+
+<div class="block-body" arg-draft="{$forum.draft_thread.bonus}" >
+	<xf:selectrow name="currency_id" value="{$currencyId}"
+				  label="{{ phrase('mjc_currency') }}" width="120px">
+		<xf:foreach loop="$xf.app.em.getRepository('MJ\Credits:Currency').getUseAbleCurrencies('bonus')" value="$currency">
+		<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+		</xf:foreach>
+	</xf:selectrow>
+
+	<xf:formrow name="total_point"
+				label="{{ phrase('红包金额') }}"
+				explain="{{ phrase('请填写您要发的红包的金额。') }}">
+		<xf:numberbox name="total_point" min="0" max="5000" value="0" />
+	</xf:formrow>
+
+	<xf:formrow name="total_people"
+				label="{{ phrase('红包个数') }}"
+				explain="{{ phrase('填写多少用户可以抢红包。') }}" >
+		<xf:numberbox name="total_people" min="0" max="5000" value="0"/>
+	</xf:formrow>
+
+	<xf:formrow rowtype="input"
+				label="{{ phrase('mjc_message') }}">
+		<input name="bonus_message" type="text" class="input" style="width:300px" maxlength="10"
+				onkeyup="javascript:setShowLength(this, 10, 'message_length');" value="{$message}">
+		<span class="formRow-explain" id="message_length">{{ phrase('还可以输入10字数。') }}</span>
+	</xf:formrow>
+	</div>
+	<script>
+		function setShowLength(obj, maxlength, id) {
+			var rem = maxlength - obj.value.length;
+			var wid = id;
+			if (rem < 0) {
+				rem = 0;
+			}
+			document.getElementById(wid).innerHTML = "还可以输入" + rem + "个字";
+		}
+	</script>
+</xf:if>]]></template>
+  <template type="public" title="mjc_bonus_delete" version_id="1030600" version_string="1.3.6"><![CDATA[<xf:title>{{ phrase('delete_bonus') }}</xf:title>
+
+<xf:breadcrumb source="$thread.getBreadcrumbs()" />
+
+<xf:form action="{{ link('posts/delete-bonus', $post) }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:if is="$post.isFirstPost()">
+				<xf:inforow>
+					<div class="blockMessage blockMessage--important"><strong>{{ phrase('note:') }}</strong> {{ phrase('mjc_delete_bonus_returned_to_user') }}</div>
+				</xf:inforow>
+			</xf:if>
+		</div>
+		<xf:submitrow icon="delete" sticky="true" />
+	</div>
+	<xf:redirect />
+</xf:form>]]></template>
+  <template type="public" title="mjc_bonus_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:if is="$post.getBonus() is not empty">
+	<div class="bonus_message">
+		<xf:form action="{{ link('posts/openBonus',$post)}}"  ajax="true" data-skip-overlay-redirect="true">
+			<div class="red-packet">
+				<main>
+					<header>
+						<xf:avatar user="$post.User" size="xxs" />
+					</header>
+					<h1>
+						{{$post.getBonusMessage().message}}
+					</h1>
+					<button class="open">开</button>
+				</main>
+			</div>
+			<xf:formrow rowtype="input" label="{{ phrase('mjc_message') }}">
+				<input name="bonus_message" type="text" class="input" style="width:300px" maxlength="20"
+					   onkeyup="javascript:setShowLength(this, 20, 'message_length');"
+					   value="{{ phrase('感谢楼主的红包！') }}"
+					   placeholder="{{ phrase('感谢楼主的红包！') }}">
+				<span class="formRow-explain" id="message_length">{{ phrase('还可以输入20字数。') }}</span>
+			</xf:formrow>
+		</xf:form>
+
+	
+	<xf:elseif is="{$post.getBonus()} == {$post.thread_id}" />		
+		{{ phrase('红包已经领完啦!') }}
+	</div>
+</xf:if>
+
+<xf:js>
+	function setShowLength(obj, maxlength, id) {
+		var rem = maxlength - obj.value.length;
+		var wid = id;
+		if (rem < 0) {
+			rem = 0;
+		}
+		document.getElementById(wid).innerHTML = "还可以输入" + rem + "个字";
+	}
+</xf:js>
+
+<xf:css>
+	.red-packet {
+		color: #fff;
+		padding: 1em;
+		height: 12em;
+		margin: auto;
+		max-width: 9em;
+		overflow: hidden;
+		position: relative;
+		border-radius: 1em;
+		background: #c40b00;
+	}
+	
+	.red-packet header{
+		top: -2em;
+		left: 0;
+		right: 0;
+		height: 5em;
+		position: absolute;
+		border-radius: 100%;
+		background: #b00b00;
+	}
+	
+	.red-packet main {
+		margin-top: 1em;
+		text-align: center;
+	}
+	
+	h1 {
+		font-size: 1em;
+		margin: 3em 0;
+		position: relative;
+	}
+	
+	.red-packet .avatar.avatar--xxs {
+		position: relative;
+		top: 60px;
+	}
+	
+	.red-packet .avatar.avatar--xxs img
+	{ 
+		left: 0;
+		right: 0;
+		margin: auto;
+		max-width: 2.2em;
+		position: absolute;
+		border-radius: 100%;
+		border: .1em solid #fff;
+	}
+	
+	.red-packet .author
+	{
+		opacity: .7;
+		top: -40px;
+		position: relative;
+	}
+
+	.red-packet .open
+	{
+		outline: 0;
+		width: 3em;
+		height: 3em;
+		color: #fff;
+		border: none;
+		display: block;
+		font-size: 1em;
+		cursor: pointer;
+		margin: 1em auto;
+		background: #ffb03a;
+		border-radius: 100%;
+		transition: background .3s, transform .3s;
+	}
+	
+	.red-packet .open:hover
+	{
+		transform: scale(1.1);
+	}
+	
+	.red-packet .open:active
+	{
+		background: #eba534;
+	}
+	@keyframes red-packet{
+		from
+		{
+			opacity: 0;
+			transform: scale(0);
+		}
+		to
+		{
+			opacity: 1;
+			transform: scale(1);
+    }
+}
+animation: red-packet .75s both cubic-bezier(0.68, -0.55, 0.27, 1.55);
+</xf:css>]]></template>
+  <template type="public" title="mjc_bonus_receiver_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:set var="$users" value="{{ $xf.app.em.getRepository('XF:Post')->findBonusForThread($post.thread_id)->fetch($xf.options.displayMoreReceiveUser) }}"/>
+<xf:set var="$total" value="{{ $xf.app.em.getRepository('XF:Post')->findBonusForThread($post.thread_id)->fetch() }}"/>
+<xf:if is="{{ count($total) }} > 0">
+	<div class="purchaser">
+		<div class="purchaser-title">
+			{{ phrase('mjc_receive_bonus_users') }}
+		</div>
+		<div class="purchaser-content">
+			<xf:if is="{{ count($total) }} > {$xf.options.displayMoreReceiveUser}">
+			<div class="purchaser-stats">
+				<dl class="pairs pairs--rows">
+					<dt>{{ count($total) }}</dt>
+					<dd>
+						<a href="{{ link('posts/more-receive-user', $post) }}"
+					   class="actionBar-action actionBar-action--report"
+					   data-xf-click="overlay">{{ phrase('mjc_more_receive_users') }}
+					</a>
+					</dd>
+				</dl>
+			</div>
+			</xf:if>
+			<div class="purchaser-extra">
+				<xf:foreach loop="$users" value="$user">
+					<span data-xf-init="tooltip" data-original-title="{$user.TriggerUser.username}{{ phrase('mjc_receive_bonus') }}: {$user.total_point|mjc_currency($user.currency_id)}"><xf:avatar user="$user.TriggerUser" size="xxs" href=""  /></span>
+				</xf:foreach>
+			</div>
+		</div>
+	</div>
+	<xf:css src="mjc_charge_purchaser_list.less" />
+</xf:if>]]></template>
+  <template type="public" title="mjc_charge_purchaser_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:set var="$users" value="{{ $xf.app.em.getRepository('XF:Post')->findPurchaserForPost($post.post_id)->fetch($xf.options.displayMorePurchaserUser) }}"/>
+<xf:set var="$total" value="{{ $xf.app.em.getRepository('XF:Post')->findPurchaserForPost($post.post_id)->fetch() }}"/>
+<xf:if is="{{ count($total) }} > 0">
+	<div class="purchaser">
+		<div class="purchaser-title">
+			{{ phrase('mjc_users_who_purchase_charge_content') }}
+		</div>
+		<div class="purchaser-content">
+			<xf:if is="{{ count($total) }} > {$xf.options.displayMorePurchaserUser}">
+				<div class="purchaser-stats">
+					<dl class="pairs pairs--rows">
+						<dt>{{ count($total) }}</dt>
+						<dd>
+							<a href="{{ link('posts/more-charge-purchasers', $post) }}"
+							   class="actionBar-action actionBar-action--report"
+							   data-xf-click="overlay">{{ phrase('mjc_more_charge_purchasers') }}
+							</a>
+						</dd>
+					</dl>
+				</div>
+			</xf:if>
+			<div class="purchaser-extra">
+				<xf:foreach loop="{$users}" value="$user">
+					<xf:avatar user="$user.User" size="xxs" defaultname="{$fallbackName}" itemprop="name" />
+				</xf:foreach>
+			</div>
+		</div>
+	</div>
+	<xf:css src="mjc_charge_purchaser_list.less" />
+</xf:if>]]></template>
+  <template type="public" title="mjc_charge_purchaser_list.less" version_id="1030400" version_string="1.3.4"><![CDATA[@_purchaser-spacing: .75em;
+@_purchaser-paddingV: @xf-paddingMedium;
+@_purchaser-paddingH: @xf-paddingLarge;
+@_bbCodeBlock-expandTriggerHeight: (@xf-bbCodeBlockExpandHeight) / 2;
+
+.purchaser
+{
+	margin: @_purchaser-spacing 0;
+	.xf-bbCodeBlock();
+}
+
+.purchaser-title
+{
+	padding: @_purchaser-paddingV @_purchaser-paddingH;
+	.xf-bbCodeBlockTitle();
+	.m-clearFix();
+}
+
+.purchaser-content
+{
+	position: relative;
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.purchaser-stats {
+  display: table-cell;
+  width: 90px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.purchaser-extra {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.pairs.pairs--rows > dt {
+  display: table-row;
+  font-size: 100%;
+}
+.pairs.pairs--rows > dd {
+	display: table-row;
+	font-size: 80%;
+}]]></template>
+  <template type="public" title="mjc_credit_wrapper" version_id="1030900" version_string="1.3.9"><![CDATA[<xf:sidenav>
+	<div class="block">
+		<div class="block-container">
+			<h3 class="block-header">{{ phrase('mjc_your_wallet') }}</h3>
+			<div class="block-body">
+				<!--[XF:credits_links:top]-->
+				<a class="blockLink {{ $pageSelected == 'overview' ? 'is-selected' : '' }}" href="{{ link('mjc-credits') }}">
+					{{ phrase('mjc_overview') }}
+				</a>
+				<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canUseEventTrigger('transfer')}">
+					<a class="blockLink {{ $pageSelected == 'transfer' ? 'is-selected' : '' }}" href="{{ link('mjc-credits/send-credit') }}">
+						{{ phrase('mjc_send_credits') }}
+					</a>
+				</xf:if>
+				<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canUseEventTrigger('exchange', {'numberCurrency': 2})}">
+					<a class="blockLink {{ $pageSelected == 'exchange' ? 'is-selected' : '' }}" href="{{ link('mjc-credits/exchange') }}">
+						{{ phrase('mjc_exchange') }}
+					</a>
+				</xf:if>
+				<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canUseEventTrigger('fine')} && {$xf.visitor.hasPermission('mjcCredits', 'canFine')}">
+					<a class="blockLink {{ $pageSelected == 'fine' ? 'is-selected' : '' }}" href="{{ link('mjc-credits/fine') }}">
+						{{ phrase('mjc_fine') }}
+					</a>
+				</xf:if>
+				<!--[XF:credits_links:bottom]-->
+			</div>
+		</div>
+	</div>
+	<div class="block">
+		<div class="block-container">
+			<h3 class="block-header">{{ phrase('mjc_transactions') }}</h3>
+			<!--[XF:logs_links:top]-->
+			<a class="blockLink {{ $pageSelected == 'transaction' ? 'is-selected' : '' }}" href="{{ link('mjc-credits/transactions') }}">
+				{{ phrase('mjc_transactions') }}
+			</a>
+			<!--[XF:logs_links:bottom]-->
+		</div>
+	</div>
+</xf:sidenav>
+
+<xf:widgetpos id="mjc_wrapper_sidenav" position="sidenav" />
+
+<xf:page option="sideNavTitle">{{ phrase('mjc_your_wallet') }}</xf:page>
+
+{$innerContent|raw}]]></template>
+  <template type="public" title="mjc_credits_app_nav.less" version_id="1020700" version_string="1.2.7"><![CDATA[.p-navgroup-link
+{
+	&.p-navgroup-link--mjc-credits i:after
+	{
+		.m-faBase();
+		display: inline-block;
+		min-width: 1.4em;
+		.m-faContent(@fa-var-wallet, .88em);
+		
+	
+	}
+}]]></template>
+  <template type="public" title="mjc_credits_currency_unlock" version_id="1020502" version_string="1.2.5"><![CDATA[<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/currency/buy-content', $currency, {'content_type': $charge.content_type, 'content_id': $charge.content_id, 'content_hash': $charge.content_hash}) }}" class="block" ajax="true">
+
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">
+				{{ phrase('mjc_credits_are_you_sure_view_for_x_y', {'param1': $currency.getFormattedValue($charge.cost), 'param2': $currency.title}) }}
+			</xf:inforow>
+		</div>
+
+		<xf:submitrow rowtype="simple" icon="purchase" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_credits_editor_dialog_charge" version_id="1020600" version_string="1.2.6"><![CDATA[<xf:title>{{ phrase('mjc_credits_charge_for_content') }}</xf:title>
+
+<form class="block" id="editor_mjc_credits_charge_form">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:numberboxrow id="editor_mjc_credits_charge_title" min="1" step="any" value="1" required="true"
+				label="{{ phrase('mjc_credits_enter_charge_amount') }}"
+				explain="{{ phrase('mjc_credits_enter_charge_amount_explain', {'currency': $currency.title}) }}" />
+		</div>
+		<xf:submitrow submit="{{ phrase('continue') }}" id="editor_mjc_credits_charge_submit" />
+	</div>
+</form>]]></template>
+  <template type="public" title="mjc_credits_helper_user_group_edit" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:macro id="usable_checkboxes"
+	arg-label="{{ phrase('usable_by_user_groups') }}"
+	arg-explain=""
+	arg-id="usable_user_group"
+	arg-userGroups=""
+	arg-selectedUserGroups="!"
+	arg-withRow="1">
+
+
+	<xf:if is="!$userGroups">
+		<xf:set var="$userGroupRepo" value="{$xf.app.em.getRepository('XF:UserGroup')}" />
+		<xf:set var="$userGroups" value="{$userGroupRepo.getUserGroupTitlePairs()}" />
+	</xf:if>
+	<xf:set var="$allUserGroups" value="{{ array_keys($userGroups) == $selectedUserGroups || in_array('-1', $selectedUserGroups) }}" />
+
+	<xf:set var="$inner">
+		<xf:radio name="{$id}" id="{$id}">
+			<xf:option value="all" selected="{$allUserGroups}">{{ phrase('all_user_groups') }}</xf:option>
+			<xf:option value="sel" selected="!{$allUserGroups}" label="{{ phrase('selected_user_groups:') }}">
+				<xf:dependent>
+					<xf:selectrow name="{{ $id . '_ids' }}" listclass="listColumns">
+						<xf:foreach loop="$userGroups" key="$userGroupId" value="$userGroupTitle">
+							<xf:option value="{$userGroupId}" selected="{{ in_array($userGroupId, $selectedUserGroups) || 3 }}">
+								{$userGroupTitle}
+							</xf:option>
+						</xf:foreach>
+					</xf:selectrow>
+
+					<xf:checkbox>
+						<xf:option data-xf-init="check-all" data-container="{{ '#' . $id }}">{{ phrase('select_all') }}</xf:option>
+					</xf:checkbox>
+				</xf:dependent>
+			</xf:option>
+		</xf:radio>
+	</xf:set>
+
+	<xf:if is="$withRow">
+		<xf:formrow label="{$label}" explain="{$explain}" name="{$id}" id="{$id}">
+			{$inner|raw}
+		</xf:formrow>
+	<xf:else />
+		{$inner|raw}
+	</xf:if>
+</xf:macro>
+
+<xf:macro id="additional_checkboxes"
+		  arg-label="{{ phrase('additional_user_groups') }}"
+		  arg-explain=""
+		  arg-id="extra_group_ids"
+		  arg-userGroups=""
+		  arg-selectedUserGroups="!"
+		  arg-withRow="1">
+
+	<xf:if is="!$userGroups">
+		<xf:set var="$userGroupRepo" value="{$xf.app.em.getRepository('XF:UserGroup')}" />
+		<xf:set var="$userGroups" value="{$userGroupRepo.getUserGroupTitlePairs()}" />
+	</xf:if>
+
+	<xf:set var="$inner">
+		<div id="{$id}">
+			<xf:checkbox name="{{ $id . '[]' }}" listclass="listColumns">
+				<xf:foreach loop="$userGroups" key="$userGroupId" value="$userGroupTitle">
+					<xf:option value="{$userGroupId}" selected="{{ in_array($userGroupId, $selectedUserGroups)  }}">
+						{$userGroupTitle}
+					</xf:option>
+				</xf:foreach>
+			</xf:checkbox>
+			<xf:checkbox>
+				<xf:option data-xf-init="check-all" data-container="{{ '#' . $id }}">{{ phrase('select_all') }}</xf:option>
+			</xf:checkbox>
+		</div>
+	</xf:set>
+
+	<xf:if is="$withRow">
+		<xf:formrow label="{$label}" explain="{$explain}" name="{$id}" id="{$id}">
+			{$inner|raw}
+		</xf:formrow>
+	<xf:else />
+		{$inner|raw}
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_credits_payment_initiate" version_id="1010700" version_string="1.1.7"><![CDATA[<xf:title>{{ phrase('confirm_payment_details') }}</xf:title>
+
+<xf:form action="{{ link('purchase/process', null, {'request_key': $purchaseRequest.request_key}) }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('mjc_credits_original_price') }}">
+				{$purchase.cost|currency($purchase.currency)}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_credits_credits_charged') }}">
+				{$cost|number($currency.decimal_places)}{$currency.suffix} {$currency.title}
+			</xf:formrow>
+		</div>
+		<xf:submitrow icon="purchase" rowtype="simple" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_credits_postbit" version_id="1020132" version_string="1.2.1 Bate 2"><![CDATA[<xf:macro name="message_macros_postbit"  arg-user="!">
+<xf:set var="$viewableCurrencies" value="{{ $xf.app.em.getRepository('MJ\Credits:Currency').getCurrencies(true) }}" />
+
+<xf:if is="$viewableCurrencies">
+	<xf:foreach loop="$viewableCurrencies" value="$currency" if="(in_array($currency.currency_id,$xf.options.mjc_display_postbit))">
+	<dl class="pairs pairs--justified">
+		<dt title="{$currency.title}">{$currency.title}</dt>
+		<dd>{$currency.prefix}{{ $currency.getValueFromUser($user) }}{$currency.suffix}</dd>
+	</dl>
+	</xf:foreach>
+</xf:if>
+</xf:macro>
+
+<xf:macro name="credits_stat_pair" arg-user="!">
+<xf:set var="$viewableCurrencies" value="{{ $xf.app.em.getRepository('MJ\Credits:Currency').getCurrencies(true) }}" />
+
+<xf:if is="$viewableCurrencies">
+	<xf:foreach loop="$viewableCurrencies" value="$currency" if="(in_array($currency.currency_id,$xf.options.mjc_display_postbit))">
+        <dl class="pairs pairs--rows pairs--rows--centered fauxBlockLink">
+           <dt title="{$currency.title}">{$currency.title}</dt>
+			<dd>{$currency.prefix}{{ $currency.getValueFromUser($user) }}{$currency.suffix}</dd>
+        </dl>
+	</xf:foreach>
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_currency_macros" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:macro name="currency_select"
+	arg-currencies="!"
+	arg-currencyId=""
+	arg-name="currency_id"
+	arg-includeAny="{{ false }}"
+	arg-row="{{ true }}"
+	arg-label="{{ phrase('mjc_currency') }}">
+	<xf:if is="{{ count($currencies) == 1 }}">
+		<xf:set var="$select">
+			<xf:foreach loop="{{ $currencies }}" value="$currency">
+				{$currency.title}
+				<xf:hiddenval name="{$name}">{$currency.currency_id}</xf:hiddenval>
+			</xf:foreach>
+		</xf:set>
+	<xf:else />
+		<xf:set var="$select">
+			<xf:select name="{$name}" value="{$currencyId}">
+				<xf:if is="{$includeAny}">
+					<xf:option label="{{ phrase('any') }}" />
+				</xf:if>
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title}</xf:option>
+				</xf:foreach>
+			</xf:select>
+		</xf:set>
+	</xf:if>
+
+	<xf:if is="$row">
+		<xf:formrow rowtype="input"
+			label="{$label}">
+			{$select|raw}
+		</xf:formrow>
+	<xf:else />
+		{$select|raw}
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_event_edit_exchange" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:numberboxrow name="options[fee]" value="{{ $event.options.fee + 0}}" min="0"
+	label="{{ phrase('mjc_fee') }}" />
+
+<xf:numberboxrow name="options[tax]" value="{{ $event.options.tax + 0}}" min="0" max="100" units="%"
+	label="{{ phrase('mjc_tax') }}" />]]></template>
+  <template type="public" title="mjc_exchange" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_exchange') }}</xf:title>
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<xf:form action="{{ link('mjc-credits/exchange') }}" class="block" ajax="true" data-skip-overlay-redirect="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:numberboxrow name="amount" value="{$amount}" min="0" step="any"
+				label="{{ phrase('mjc_amount') }}" />
+
+			<xf:selectrow name="from" value="{$currencyId}"
+				label="{{ phrase('mjc_from_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+
+			<xf:macro template="mjc_currency_macros" name="currency_select"
+				arg-name="to"
+				arg-label="{{ phrase('mjc_to_currency') }}"
+				arg-currencies="{{ $currencies }}"
+				arg-includeEmpty="{{ false }}" />
+		</div>
+		<xf:submitrow submit="{{ phrase('send') }}" icon="purchase" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_fine" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:if is="{$xf.visitor.hasPermission('mjcCredits', 'canFine')}">
+    <xf:title>{{ phrase('mjc_fine_user') }}</xf:title>
+
+    <xf:wrap template="mjc_credit_wrapper"/>
+
+    <xf:form action="{{ link('mjc-credits/fine') }}" class="block" ajax="true">
+
+        <div class="block-container">
+            <div class="block-body">
+
+                <xf:textboxrow name="username" value="{$username}" ac="single" autocomplete="off"
+                               label="{{ phrase('mjc_being_fine_userneme') }}"
+                               maxlength="{{ max_length($xf.visitor, 'username') }}"
+                               placeholder="{{ phrase('name...') }}"/>
+
+                <xf:formrow label="{{ phrase('mjc_amount') }}">
+                    <div class="inputGroup">
+                        <xf:numberbox name="fine_amount" size="15" min="0"/>
+                    </div>
+                </xf:formrow>
+
+                <xf:selectrow name="currency_id" value="{$currencyId}"
+                              label="{{ phrase('mjc_currency') }}">
+                    <xf:foreach loop="{{ $currencies }}" value="$currency">
+                        <xf:option value="{$currency.currency_id}">{$currency.title}</xf:option>
+                    </xf:foreach>
+                </xf:selectrow>
+
+                <xf:textarearow name="message" value="{$message}" autosize="true"
+                                label="{{ phrase('mjc_message') }}"/>
+            </div>
+            <xf:submitrow submit="{{ phrase('mjc_fine') }}" icon="purchase"/>
+        </div>
+    </xf:form>
+</xf:if>]]></template>
+  <template type="public" title="mjc_member_fine" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:if is="{$xf.visitor.hasPermission('mjcCredits', 'canFine')}">
+<xf:title>{{ phrase('mjc_fine_user:') }} {$user.username}</xf:title>
+
+
+<xf:form action="{{ link('members/fine', $user) }}" class="block" ajax="true">
+
+	<div class="block-container">
+		<div class="block-body">
+			<xf:hiddenval name="username" value="{$user.username}" />
+
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				<div class="inputGroup">
+					<xf:numberbox name="fine_amount" size="15" min="0"/>
+				</div>
+			</xf:formrow>
+
+			<xf:selectrow name="currency_id" value="{$currencyId}"
+						  label="{{ phrase('mjc_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$user.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+
+			<xf:textarearow name="message" value="{$message}" autosize="true"
+							label="{{ phrase('mjc_message') }}" />
+		</div>
+		<xf:submitrow submit="{{ phrase('mjc_fine') }}" icon="purchase" />
+	</div>
+</xf:form>
+</xf:if>]]></template>
+  <template type="public" title="mjc_more_charge_purchasers_list" version_id="1030500" version_string="1.3.5"><![CDATA[<xf:title>{{ phrase('mjc_more_charge_purchasers') }}</xf:title>
+<div class="block">
+	<div class="block-container">
+		<ol class="block-body">
+			<xf:foreach loop="$users" value="$user">
+				<li class="block-row block-row--separated">
+					<div class="contentRow">
+						<div class="contentRow-figure">
+							<xf:avatar user="$user" size="s" notooltip="true" />
+						</div>
+						<div class="contentRow-main">
+							<h3 class="contentRow-header"><xf:username user="$user.User" rich="true" notooltip="true" /></h3>
+							<xf:userblurb user="$user" class="contentRow-lesser" />
+						</div>
+					</div>
+				</li>
+			</xf:foreach>
+		</ol>
+	</div>
+</div>]]></template>
+  <template type="public" title="mjc_more_receive_user_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:title>{{ phrase('mjc_more_receive_users') }}</xf:title>
+<div class="block">
+	<div class="block-container">
+		<ol class="block-body">
+			<xf:foreach loop="$users" value="$user">
+				<li class="block-row block-row--separated">
+					<div class="contentRow">
+						<div class="contentRow-figure">
+							<xf:avatar user="$user" size="s" notooltip="true" />
+						</div>
+						<div class="contentRow-main">
+							<h3 class="contentRow-header"><xf:username user="$user.User" rich="true" notooltip="true" /></h3>
+							<xf:userblurb user="$user" class="contentRow-lesser" />
+							<div class="contentRow-minor">
+								<ul class="listInline listInline--bullet">
+									<!--[XF:stats:start]-->
+									<li><dl class="pairs pairs--inline">
+										<dt>{{ phrase('mjc_total_point') }}</dt>
+										<dd>{$user.total_point|mjc_currency($user.currency_id)}</dd>
+										</dl></li>
+									<!--[XF:stats:end]-->
+								</ul>
+							</div>
+						</div>
+					</div>
+				</li>
+			</xf:foreach>
+		</ol>
+	</div>
+</div>]]></template>
+  <template type="public" title="mjc_more_reward_user_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:title>{{ phrase('mjc_more_reward_users') }}</xf:title>
+<div class="block">
+	<div class="block-container">
+		<ol class="block-body">
+			<xf:foreach loop="$users" value="$user">
+				<li class="block-row block-row--separated">
+					<div class="contentRow">
+						<div class="contentRow-figure">
+							<xf:avatar user="$user" size="s" notooltip="true" />
+						</div>
+						<div class="contentRow-main">
+							<h3 class="contentRow-header"><xf:username user="$user.User" rich="true" notooltip="true" /></h3>
+							<xf:userblurb user="$user" class="contentRow-lesser" />
+							<div class="contentRow-minor">
+								<ul class="listInline listInline--bullet">
+									<!--[XF:stats:start]-->
+									<li><dl class="pairs pairs--inline">
+										<dt>{{ phrase('mjc_reward_amount') }}</dt>
+										<dd>{$user.amount|mjc_currency($user.currency_id)}</dd>
+										</dl></li>
+									<!--[XF:stats:end]-->
+								</ul>
+							</div>
+						</div>
+					</div>
+				</li>
+			</xf:foreach>
+		</ol>
+	</div>
+</div>]]></template>
+  <template type="public" title="mjc_nav_account_wallet" version_id="1020501" version_string="1.2.5"><![CDATA[<xf:macro name="navbar" arg-section="!" arg-nav="">
+	<xf:if is="{{ $nav AND $xf.visitor.hasPermission('mjcCredits', 'useCredits')  AND $xf.options.mjc_credits_navbar.enabled == 2 AND $xf.options.mjc_credits_navbar.right_position == $section }} }}">
+		<xf:macro name="nav_link"
+				  arg-navId="mjc-credits"
+				  arg-nav="{$nav}"
+				  arg-titleHtml="{{ !$xf.options.mjc_credits_navbar.right_text ? '' : null }}"
+				  arg-class="p-navgroup-link--mjc-credits" />
+	</xf:if>
+</xf:macro>
+
+<xf:macro name="nav_link" arg-navId="!" arg-nav="!" arg-titleHtml="{{ null }}" arg-menuTitle="{{ true }}" arg-shortcut="{{ false }}">
+	<xf:set var="$tag" value="{{ $nav.href ? 'a' : 'span' }}" />
+
+	<{$tag} {{ $nav.href ? 'href="' . $nav.href . '"' : '' }}
+		class="p-navgroup-link p-navgroup-link--iconic p-navgroup-link--{$navId} js-badge--{$navId} badgeContainer{{ $nav.counter ? ' badgeContainer--highlighted' : '' }} {$nav.attributes.class}"
+		data-badge="{$nav.counter|number}"
+		{{ $nav.children ? 'data-xf-click="menu"' : '' }}
+		{{ $shortcut !== false ? 'data-xf-key="' . $shortcut . '"' : '' }}
+		data-menu-pos-ref="< .p-navgroup"
+		aria-expanded="false"
+		aria-haspopup="true">
+			<i aria-hidden="true"></i>
+			<span class="p-navgroup-linkText">{{ $titleHtml !== null ? $titleHtml|raw : phrase('mjc_wallet') }}</span>
+	</{$tag}>
+	<xf:if is="$nav.children">
+		<div class="menu menu--structural menu--medium" data-menu="menu" aria-hidden="true">
+			<div class="menu-content">
+				<xf:if is="$menuTitle">
+					<h3 class="menu-header">
+						<xf:if is="$nav.href">
+							<a href="{$nav.href}">{$nav.title}</a>
+						<xf:else />
+							{$nav.title}
+						</xf:if>
+					</h3>
+					<xf:include template="mjc_wallet_popup" />
+				</xf:if>
+			</div>
+		</div>
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_offer_reward_create" version_id="1020700" version_string="1.2.7"><![CDATA[<xf:if is="{$xf.app.em.getRepository('MJ\Credits:Event').canDisplayEvent('offerReward')}">
+	<div class="block-body" arg-draft="{$forum.draft_thread.offer_reward}" >
+		<xf:selectrow name="reward_currency_id" value="{$currencyId}"
+					  label="{{ phrase('mjc_currency') }}" width="120px">
+			<xf:foreach loop="$xf.app.em.getRepository('MJ\Credits:Currency').getUseAbleCurrencies('offerReward')" value="$currency">
+				<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+			</xf:foreach>
+		</xf:selectrow>
+
+		<xf:formrow name="reward_amount"
+					label="{{ phrase('悬赏金额') }}"
+					explain="{{ phrase('请填写您要发发布的悬赏金额。') }}">
+			<xf:numberbox name="reward_amount" min="0" max="500" value="0" />
+		</xf:formrow>
+	</div>
+</xf:if>]]></template>
+  <template type="public" title="mjc_overview" version_id="1030800" version_string="1.3.8"><![CDATA[<xf:title>{{ phrase('mjc_credit') }}</xf:title>
+
+<xf:css src="mjc_overview.less" />
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<div class="block">
+	<div class="block-container">
+		<h3 class="block-header">{{ phrase('mjc_recently_transactions') }}</h3>
+		<div class="block-body">
+			<xf:datalist data-xf-init="responsive-data-list">
+				<xf:datarow rowtype="header">
+					<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+					<xf:cell class="dataList-cell--min">{{ phrase('mjc_status') }}</xf:cell>
+					<xf:cell>{{ phrase('mjc_event') }}</xf:cell>
+					<xf:cell class="dataList-cell--min">{{ phrase('mjc_trigger_user') }}</xf:cell>
+					<xf:cell class="dataList-cell--min">{{ phrase('mjc_amount') }}</xf:cell>
+					<xf:cell>{{ phrase('mjc_description') }}</xf:cell>
+				</xf:datarow>
+				<xf:foreach loop="$transactions" value="$transaction">
+					<xf:macro template="mjc_transaction_list" name="transaction_item"
+						arg-transaction="{$transaction}" />
+				</xf:foreach>
+			</xf:datalist>
+		</div>
+		<div class="block-footer">
+			<span class="block-footer-controls"><a href="{{ link('mjc-credits/transactions') }}" class="button"><span class="button-text">{{ phrase('see_more') }}</span></a></span>
+		</div>
+	</div>
+</div>
+]]></template>
+  <template type="public" title="mjc_overview.less" version_id="1020235" version_string="1.2.2"><![CDATA[.block-outer-reward
+{
+	float: left;
+}]]></template>
+  <template type="public" title="mjc_red_envelope" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_send_red_envelope') }}：<xf:username user="{{ $user }}" rich="true" /> </xf:title>
+
+<xf:breadcrumb href="{{ link('mjc-credits') }}">{{ phrase('mjc_credits') }}</xf:breadcrumb>
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<xf:form action="{{ link('posts/red-envelope', $post) }}" data-xf-init="mjc-send-credit-form" class="block" ajax="true" data-skip-overlay-redirect="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('name') }}" rowtype="input">
+				<xf:username user="{{ $user }}" rich="true" />
+			</xf:formrow>
+
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				<div class="inputGroup">
+					<xf:textbox name="amount" value="{$amount}" class="sendAmount input--autoSize" size="15" />
+				</div>
+			</xf:formrow>
+
+			<xf:selectrow name="currency_id" value="{$currencyId}"
+				label="{{ phrase('mjc_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+
+			<xf:formrow rowtype="input" label="{{ phrase('mjc_message') }}">
+				<input name="message" type="text" class="input" style="width:300px" maxlength="10"
+				onkeyup="javascript:setShowLength(this, 10, 'message_length');" value="{$message}">
+				<span class="formRow-explain" id="message_length">{{ phrase('还可以输入10字数。') }}</span>
+			</xf:formrow>
+
+			<xf:if is="$canAnonymousTransfer">
+				<xf:checkboxrow>
+					<xf:option name="anonymous" value="1" selected="$event.anonymous">{{ phrase('mjc_anonymous') }}</xf:option>
+				</xf:checkboxrow>
+			</xf:if>
+		</div>
+		<xf:submitrow submit="{{ phrase('send') }}" icon="purchase" />
+	</div>
+
+	<xf:js>
+		function setShowLength(obj, maxlength, id) {
+			var rem = maxlength - obj.value.length;
+			var wid = id;
+			if (rem < 0) {
+				rem = 0;
+			}
+			document.getElementById(wid).innerHTML = "还可以输入" + rem + "个字";
+		}
+	</xf:js>
+</xf:form>]]></template>
+  <template type="public" title="mjc_red_envelope_list" version_id="1030400" version_string="1.3.4"><![CDATA[<xf:if is="$post.User.user_id == $post.getRedEnvelope() AND $post.getRedEnvelopeStatus() == 'pending'">
+	<xf:form action="{{ link('posts/openRedEnvelope',$post)}}"  ajax="true">		
+			<div class="red-packet">
+				<main>
+					<header>
+						<xf:foreach loop="{$post.getRedEnvelopeFrom()}" value="$user">
+						<xf:avatar user="$user" size="xxs" />
+						</xf:foreach>
+					</header>
+					<h1>
+						<xf:if is="$post.User.user_id == $xf.visitor.user_id OR $xf.visitor.user_id == {{ $post.getRedEnvelopeMessage().from_user_id }}">
+						{{$post.getRedEnvelopeMessage().message}}
+						<xf:else />
+							信息不公开
+						</xf:if>
+					</h1>
+					<button class="open">开</button>
+				</main>
+			</div>
+
+	</xf:form>
+<xf:css>
+	.red-packet {
+		color: #fff;
+		padding: 1em;
+		height: 12em;
+		margin: auto;
+		max-width: 9em;
+		overflow: hidden;
+		position: relative;
+		border-radius: 1em;
+		background: #c40b00;
+	}
+	
+	.red-packet header{
+		top: -2em;
+		left: 0;
+		right: 0;
+		height: 5em;
+		position: absolute;
+		border-radius: 100%;
+		background: #b00b00;
+	}
+	
+	.red-packet main {
+		margin-top: 1em;
+		text-align: center;
+	}
+	
+	h1 {
+		font-size: 1em;
+		margin: 3em 0;
+		position: relative;
+	}
+	
+	.red-packet .avatar.avatar--xxs {
+		position: relative;
+		top: 60px;
+	}
+	
+	.red-packet .avatar.avatar--xxs img
+	{ 
+		left: 0;
+		right: 0;
+		margin: auto;
+		max-width: 2.2em;
+		position: absolute;
+		border-radius: 100%;
+		border: .1em solid #fff;
+	}
+	
+	.red-packet .author
+	{
+		opacity: .7;
+		top: -40px;
+		position: relative;
+	}
+	
+	.red-packet .open
+	{
+		outline: 0;
+		width: 3em;
+		height: 3em;
+		color: #fff;
+		border: none;
+		display: block;
+		font-size: 1em;
+		cursor: pointer;
+		margin: 1em auto;
+		background: #ffb03a;
+		border-radius: 100%;
+		transition: background .3s, transform .3s;
+	}
+	
+	.red-packet .open:hover
+	{
+		transform: scale(1.1);
+	}
+	
+	.red-packet .open:active
+	{
+		background: #eba534;
+	}
+	@keyframes red-packet{
+		from
+		{
+			opacity: 0;
+			transform: scale(0);
+		}
+		to
+		{
+			opacity: 1;
+			transform: scale(1);
+    }
+}
+animation: red-packet .75s both cubic-bezier(0.68, -0.55, 0.27, 1.55);
+</xf:css>
+</xf:if>]]></template>
+  <template type="public" title="mjc_reward" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('打赏') }}: <xf:username user="{{ $user }}" rich="true" /></xf:title>
+
+<xf:form action="{{ link('posts/reward', $post) }}" class="block" ajax="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('name') }}">
+				<xf:username user="{{ $user }}" rich="true" />
+			</xf:formrow>
+
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				<div class="inputGroup">
+					<xf:textbox name="amount" value="{$amount}" class="sendAmount input--autoSize" size="15" />
+				</div>
+			</xf:formrow>
+
+			<xf:selectrow name="currency_id" value="{$currencyId}"
+				label="{{ phrase('mjc_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+		</div>
+		<xf:submitrow submit="{{ phrase('打赏') }}" icon="purchase" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_reward_edit" version_id="1020300" version_string="1.2.3"><![CDATA[<xf:title>{{ phrase('mjc_reward_edit') }}</xf:title>
+
+<xf:form action="{{ link('threads/reward-edit', $thread) }}" data-xf-init="mjc-reward-edit-form" class="block" ajax="true" data-skip-overlay-redirect="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				<div class="inputGroup">
+					<xf:textbox name="reward_amount" value="{$amount}" class="sendAmount input--autoSize" size="15" />
+				</div>
+			</xf:formrow>
+
+			<xf:selectrow name="reward_currency_id" value="{$currencyId}"
+				label="{{ phrase('mjc_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+		</div>
+		<xf:submitrow sticky="true" icon="save" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_reward_user_list" version_id="1030500" version_string="1.3.5"><![CDATA[<xf:set var="$users" value="{{ $xf.app.em.getRepository('XF:Post')->findRewardForThread($post.post_id)->fetch($xf.options.displayMoreRewardUser) }}"/>
+<xf:set var="$total" value="{{ $xf.app.em.getRepository('XF:Post')->findRewardForThread($post.post_id)->fetch() }}"/>
+
+<xf:if is="{{ count($total) }} > 0">
+	<div class="purchaser">
+		<div class="purchaser-title">
+			{{ phrase('mjc_reward_users') }}
+		</div>
+		<div class="purchaser-content">
+			<xf:if is="{{ count($total) }} > {$xf.options.displayMoreRewardUser}">
+				<div class="purchaser-stats">
+					<dl class="pairs pairs--rows">
+						<dt>{{ count($total) }}</dt>
+						<dd>
+							<a href="{{ link('posts/more-reward-user', $post) }}"
+							   class="actionBar-action actionBar-action--report"
+							   data-xf-click="overlay">{{ phrase('mjc_more_reward_users') }}
+							</a>
+						</dd>
+					</dl>
+				</div>
+			</xf:if>
+			<div class="purchaser-extra">
+				<xf:foreach loop="$users" value="$user">
+					<span data-xf-init="tooltip" data-original-title="{$user.User.username}{{ phrase('打赏')}}: {$user.amount|mjc_currency($user.currency_id)}"><xf:avatar user="$user.User" size="xxs" href=""  /></span>
+			    </xf:foreach>
+			</div>
+		</div>
+	</div>
+</xf:if>
+<xf:css src="mjc_charge_purchaser_list.less" />]]></template>
+  <template type="public" title="mjc_send_credit" version_id="1040200" version_string="1.4.2"><![CDATA[<xf:title>{{ phrase('mjc_send_credit') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('mjc-credits/send-credit') }}">{{ phrase('mjc_send_credits') }}</xf:breadcrumb>
+
+<xf:js src="mj/mjc/send-credit.js" min="0" />
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<xf:form action="{{ link('mjc-credits/send-credit') }}" data-xf-init="mjc-send-credit-form" class="block" ajax="true" data-skip-overlay-redirect="true">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:textboxrow name="username" value="{$username}" ac="single" autocomplete="off"
+				label="{{ phrase('mjc_receiver') }}"
+				maxlength="{{ max_length($xf.visitor, 'username') }}"
+				placeholder="{{ phrase('name...') }}" />
+
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				<div class="inputGroup">
+					<xf:textbox name="amount" value="{$amount}" class="sendAmount input--autoSize" size="15" />
+				</div>
+			</xf:formrow>
+
+			<xf:selectrow name="currency_id" value="{$currencyId}"
+				label="{{ phrase('mjc_currency') }}">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title} ({{ phrase('mjc_available:')}} {$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)})</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+
+			<xf:selectrow name="fee_type" value="{$event.fee_type}"
+				label="{{ phrase('mjc_fee_type') }}"
+				explain="{{ phrase('mjc_fee_type_explain') }}">
+				<xf:option value="sender">{{ phrase('mjc_sender') }}</xf:option>
+				<xf:option value="receiver">{{ phrase('mjc_receiver') }}</xf:option>
+				<xf:option value="both">{{ phrase('mjc_both') }}</xf:option>
+			</xf:selectrow>
+
+			<xf:formrow rowtype="input" rowclass="mjc-summary"
+				label="{{ phrase('mjc_summary') }}">
+			</xf:formrow>
+
+			<xf:textarearow name="message" value="{$message}" autosize="true"
+				label="{{ phrase('mjc_message') }}" />
+
+			<xf:if is="$canAnonymousTransfer">
+				<xf:checkboxrow>
+					<xf:option name="anonymous" value="1" selected="$event.anonymous">{{ phrase('mjc_anonymous') }}</xf:option>
+				</xf:checkboxrow>
+			</xf:if>
+		</div>
+		<xf:submitrow submit="{{ phrase('send') }}" icon="purchase" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_send_credit_amount" version_id="1040200" version_string="1.4.2"><![CDATA[<dd>
+	<ul class="inputChoices">
+		<li>{{ phrase('mjc_send:') }} {$sendAmount|mjc_currency($currency.currency_id)}</li>
+		<li>{{ phrase('mjc_receive:') }} {$receiveAmount|mjc_currency($currency.currency_id)}</li>
+	</ul>
+</dd>]]></template>
+  <template type="public" title="mjc_send_credit_choosers" version_id="1000000" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('mjc_send_credit') }}</xf:title>
+
+<xf:breadcrumb href="{{ link('mjc-credits') }}">{{ phrase('mjc_credits') }}</xf:breadcrumb>
+
+<xf:title>{{ phrase('mjc_choose_currency') }}</xf:title>
+
+<xf:form action="{{ link('mjc-credits/send-credit') }}" method="get" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:selectrow label="{{ phrase('mjc_currency') }}" name="currency_id">
+				<xf:foreach loop="{{ $currencies }}" value="$currency">
+					<xf:option value="{$currency.currency_id}">{$currency.title}</xf:option>
+				</xf:foreach>
+			</xf:selectrow>
+		</div>
+		<xf:hiddenval name="username">{$username}</xf:hiddenval>
+		<xf:hiddenval name="amount">{$amount}</xf:hiddenval>
+		<xf:hiddenval name="message">{$message}</xf:hiddenval>
+		<xf:hiddenval name="canAnonymousTransfer">{$canAnonymousTransfer}</xf:hiddenval>
+		<xf:submitrow submit="{{ phrase('mjc_send_credit') }}" icon="add" />
+	</div>
+</xf:form>]]></template>
+  <template type="public" title="mjc_transaction_list" version_id="1030800" version_string="1.3.8"><![CDATA[<xf:if is="$canViewOthers">
+	<xf:set var="$title">{{ phrase('mjc_transactions') }}</xf:set>
+<xf:else />
+	<xf:set var="$title">{{ phrase('mjc_your_transactions') }}</xf:set>
+</xf:if>
+
+<xf:title page="{$page}">{$title}</xf:title>
+<xf:h1>{$title}</xf:h1>
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<xf:breadcrumb href="{{ link('mjc-credits/transactions') }}">{{ phrase('mjc_transactions') }}</xf:breadcrumb>
+
+<xf:if is="$transactions is not empty">
+	<div class="block">
+		<div class="block-outer"><xf:trim>
+			<xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+				link="mjc-credits/not-withdraw" params="{$conditions}"
+				wrapperclass="block-outer-main" />
+		</xf:trim></div>
+
+		<div class="block-container">
+
+			<xf:macro name="search_menu"
+				arg-conditions="{$conditions}"
+				arg-currencies="{$currencies}"
+				arg-canViewOthers="{$canViewOthers}"
+				arg-eventDefinitions="{$eventDefinitions}" />
+
+			<div class="block-body">
+				<xf:datalist data-xf-init="responsive-data-list">
+					<xf:datarow rowtype="header">
+						<xf:cell class="dataList-cell--min">&nbsp;</xf:cell>
+						<xf:cell class="dataList-cell--min">{{ phrase('mjc_status') }}</xf:cell>
+						<xf:cell>{{ phrase('mjc_event') }}</xf:cell>
+						<xf:if is="$canViewOthers">
+							<xf:cell>{{ phrase('mjc_user') }}</xf:cell>
+						</xf:if>
+						<xf:cell>{{ phrase('mjc_trigger_user') }}</xf:cell>
+						<xf:cell class="dataList-cell--min">{{ phrase('mjc_amount') }}</xf:cell>
+						<xf:cell>{{ phrase('mjc_description') }}</xf:cell>
+					</xf:datarow>
+					<xf:foreach loop="$transactions" value="$transaction">
+						<xf:macro name="transaction_item"
+							arg-transaction="{$transaction}"
+							arg-canViewOthers="{$canViewOthers}" />
+					</xf:foreach>
+				</xf:datalist>
+			</div>
+		</div>
+
+		<div class="block-outer block-outer--after">
+			<xf:pagenav
+				page="{$page}" perpage="{$perPage}" total="{$total}"
+				link="mjc-credits/transactions" params="{$conditions}"
+				wrapperclass="block-outer-main" />
+
+			<xf:showignored wrapperclass="block-outer-opposite" />
+		</div>
+	</div>
+<xf:else />
+	<div class="blockMessage">
+		<xf:if is="$conditions">
+			{{ phrase('mjc_there_no_transactions_matching_your_filters') }}
+		<xf:else />
+			{{ phrase('mjc_no_transactions_have_been_created_yet') }}
+		</xf:if>
+	</div>
+</xf:if>
+
+<xf:macro name="transaction_item"
+	arg-transaction="!"
+	arg-canViewOthers="{{ false }}">
+	<xf:datarow rowclass="dataList-row--noHover">
+		<xf:cell class="dataList-cell--min">#{$transaction.transaction_id}</xf:cell>
+		<xf:cell class="dataList-cell--min" data-xf-init="tooltip" title="{$transaction.getStatusPhrase()}">
+			<xf:if is="$transaction.transaction_status == 'pending'">
+				<i class="fa fa-clock-o" aria-hidden="true"></i>
+			<xf:elseif is="$transaction.transaction_status == 'completed'" />
+				<i class="fa fa-check" aria-hidden="true"></i>
+			<xf:else />
+				<i class="fa fa-undo" aria-hidden="true"></i>
+			</xf:if>
+		</xf:cell>
+		<xf:cell class="dataList-cell--main" hash="{$transaction.transaction_id}">
+			<a href="{{ link('mjc-credits/transactions', $transaction) }}"  title="{$transaction.title}" data-xf-click="overlay">{$transaction.title}</a>
+			<span class="dataList-secondRow">
+				{{ date_time($transaction.transaction_date) }}
+			</span>
+		</xf:cell>
+		<xf:if is="$canViewOthers">
+			<xf:cell>
+				<xf:if is="$transaction.User.username">
+					<xf:username user="$transaction.User" defaultname="{$transaction.User.username}" />
+				<xf:else />
+					{{ phrase('unknown_user') }}
+				</xf:if>
+			</xf:cell>
+		</xf:if>
+		<xf:cell>
+			<xf:if is="$transaction.TriggerUser.username">
+				<xf:username user="$transaction.TriggerUser" defaultname="{$transaction.TriggerUser.username}" />
+			<xf:else />
+				{{ phrase('mjc_system') }}
+			</xf:if>
+		</xf:cell>
+		<xf:cell class="dataList-cell--min">
+			{$transaction.amount|mjc_currency($transaction.currency_id, true)}
+			<span class="dataList-secondRow">{{ $transaction.Currency.title }}</span>
+		</xf:cell>
+		<xf:cell>
+			{{ $transaction.description }}
+			<span class="dataList-secondRow">{{ bb_code($transaction.message, 'mjc_transaction', $transaction) }}</span>
+		</xf:cell>
+	</xf:datarow>
+</xf:macro>
+
+<xf:macro name="transaction_item_simple"
+	arg-transaction="!">
+	<xf:datarow rowclass="dataList-row--noHover">
+		<xf:cell class="dataList-cell--min" data-xf-init="tooltip" title="{$transaction.getStatusPhrase()}">
+			<xf:if is="$transaction.transaction_status == 'pending'">
+				<i class="fa fa-clock-o" aria-hidden="true"></i>
+			<xf:elseif is="$transaction.transaction_status == 'completed'" />
+				<i class="fa fa-check" aria-hidden="true"></i>
+			<xf:else />
+				<i class="fa fa-undo" aria-hidden="true"></i>
+			</xf:if>
+		</xf:cell>
+		<xf:cell  class="dataList-cell--min" hash="{$transaction.transaction_id}">
+			<a href="{{ link('mjc-credits/transactions', $transaction) }}" data-xf-click="overlay">{{ date_time($transaction.transaction_date) }}</a>
+		</xf:cell>
+		<xf:cell class="dataList-cell--main">{{ $transaction.Event ? $transaction.Event.title : $transaction.definition_id }}</xf:cell>
+		<xf:cell class="dataList-cell--min">{$transaction.amount|mjc_currency($transaction.currency_id, true)}</xf:cell>
+		<xf:cell>{{ $transaction.description }}</xf:cell>
+	</xf:datarow>
+</xf:macro>
+
+<xf:macro name="search_menu"
+	arg-conditions="!"
+	arg-currencies="!"
+	arg-eventDefinitions="!">
+	<div class="block-filterBar">
+		<div class="filterBar">
+			<a class="filterBar-menuTrigger" data-xf-click="menu" role="button" tabindex="0" aria-expanded="false" aria-haspopup="true">{{ phrase('refine_search') }}</a>
+			<div class="menu menu--wide" data-menu="menu" aria-hidden="true">
+				<div class="menu-content">
+					<h4 class="menu-header">{{ phrase('refine_search') }}</h4>
+					<div class="js-filterMenuBody">
+						<xf:form action="{{ link('mjc-credits/transactions') }}">
+							<div class="menu-row">
+								{{ phrase('mjc_currencies:') }}
+								<div class="u-inputSpacer">
+									<xf:macro template="mjc_currency_macros" name="currency_select"
+										arg-currencies="{$currencies}"
+										arg-currencyId="{$conditions.currency_id}"
+										arg-includeAny="{{ true }}"
+										arg-row="{{ false }}" />
+								</div>
+							</div>
+
+							<div class="menu-row menu-row--separated">
+								{{ phrase('mjc_event_definition:') }}
+								<div class="u-inputSpacer">
+									<xf:select name="definition_id" value="{$conditions.definition_id}">
+										<xf:option />
+										<xf:options source="{$eventDefinitions}" />
+									</xf:select>
+								</div>
+							</div>
+							<xf:if is="$canViewOthers">
+								<div class="menu-row">
+									{{ phrase('mjc_user:') }}
+									<div class="u-inputSpacer">
+										<xf:textbox name="username" type="search" value="{$conditions.username}" />
+									</div>
+								</div>
+							</xf:if>
+							<div class="menu-row">
+								{{ phrase('mjc_trigger_user:') }}
+								<div class="u-inputSpacer">
+									<xf:textbox name="trigger_username" type="search" value="{$conditions.trigger_username}" />
+								</div>
+							</div>
+
+							<div class="menu-row">
+								{{ phrase('mjc_transaction_status:') }}
+								<div class="u-inputSpacer">
+									<xf:select name="transaction_status" value="{$conditions.transaction_status}">
+										<xf:option value="">{{ phrase('mjc_all') }}</xf:option>
+										<xf:option value="pending">{{ phrase('mjc_pending') }}</xf:option>
+										<xf:option value="completed">{{ phrase('mjc_completed') }}</xf:option>
+										<xf:option value="reverted">{{ phrase('mjc_reverted') }}</xf:option>
+									</xf:select>
+								</div>
+							</div>
+
+							<div class="menu-row menu-row--separated">
+								{{ phrase('sort:') }}
+								<div class="inputPair">
+									<xf:select name="order" value="{$conditions.order}">
+										<xf:option value="transaction_date">{{ phrase('mjc_created_date') }}</xf:option>
+										<xf:option value="amount">{{ phrase('mjc_amount') }}</xf:option>
+										<xf:option value="last_update">{{ phrase('mjc_last_update') }}</xf:option>
+									</xf:select>
+									<xf:select name="direction" value="{$conditions.direction}">
+										<xf:option value="desc">{{ phrase('descending') }}</xf:option>
+										<xf:option value="asc">{{ phrase('ascending') }}</xf:option>
+									</xf:select>
+								</div>
+							</div>
+							<div class="menu-footer">
+								<span class="menu-footer-controls">
+									<xf:button type="submit" icon="search" class="button--primary">{{ phrase('refine_search') }}</xf:button>
+								</span>
+							</div>
+							<xf:hiddenval name="search">1</xf:hiddenval>
+						</xf:form>
+
+						<xf:js>
+							$(function()
+							{
+								$('.js-presetChange').change(function(e)
+								{
+									var $ctrl = $(this),
+									value = $ctrl.val(),
+									$form = $ctrl.closest('form');
+
+									if (value == -1)
+									{
+										return;
+									}
+
+									$form.find($ctrl.data('start') || 'input[name=start]').val(value);
+									$form.find($ctrl.data('end') || 'input[name=end]').val('');
+									$form.submit();
+								});
+							});
+						</xf:js>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_transaction_view" version_id="1030800" version_string="1.3.8"><![CDATA[<xf:title>{{ phrase('mjc_view_transaction:') }} #{$transaction.transaction_id}</xf:title>
+
+<xf:breadcrumb href="{{ link('mjc-credits/transactions') }}">{{ phrase('mjc_transactions') }}</xf:breadcrumb>
+
+<xf:wrap template="mjc_credit_wrapper" />
+
+<div class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:formrow label="{{ phrase('mjc_id') }}">
+				#{$transaction.transaction_id}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_status') }}">
+				{$transaction.getStatusPhrase()}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_event') }}"
+				explain="{$transaction.Event.description}">
+				{$transaction.title}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_trigger_date') }}">
+				{{ date_time($transaction.transaction_date) }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_trigger_user') }}">
+				{{ $transaction.TriggerUser.username ?: phrase('mjc_system') }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_currency') }}">
+				{{ $transaction.Currency.title }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_amount') }}">
+				{$transaction.amount|mjc_currency($transaction.currency_id)}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('mjc_description') }}">
+				{{ $transaction.description }}
+			</xf:formrow>
+			<xf:formrow label="{{ phrase('message') }}">
+				{{ $transaction.message }}
+			</xf:formrow>
+			<xf:if is="{$transaction.content_link}">
+				<xf:formrow label="{{ phrase('mjc_content') }}">
+					<a href="{$transaction.content_link}" target="_blank" title="">{{ phrase('mjc_view_content') }}</a>
+				</xf:formrow>
+			</xf:if>
+		</div>
+	</div>
+</div>]]></template>
+  <template type="public" title="mjc_wallet_popup" version_id="1020700" version_string="1.2.7"><![CDATA[<xf:set var="$viewableCurrencies" value="{{ $xf.app.em.getRepository('MJ\Credits:Currency').getCurrencies(true) }}" />
+<xf:if is="$viewableCurrencies">
+	<div class="menu-row menu-row--highlighted">
+		<xf:foreach loop="$viewableCurrencies" value="$currency" if="$currency.wallet_popup">
+			<dl class="pairs pairs--justified fauxBlockLink">
+				<dt>{$currency.title}</dt>
+				<dd>
+					{$currency.prefix}{{ $currency.getValueFromUser($xf.visitor) }}{$currency.suffix}
+				</dd>
+			</dl>
+		</xf:foreach>
+	</div>
+</xf:if>
+
+
+<!--[XF:menu_separator:below_visitor_panel]-->
+<hr class="menu-separator menu-separator--hard" />
+
+<ul class="listPlain listColumns--together">
+	<!--[XF:content_links:top]-->
+	<xf:if is="{$canTransfer}">
+		<li><a href="{{ link('mjc-credits/send-credit') }}" class="menu-linkRow">{{ phrase('mjc_send_credits') }}</a></li>
+	</xf:if>
+	<xf:if is="{$canExchange}">
+		<li><a href="{{ link('mjc-credits/exchange') }}" class="menu-linkRow">{{ phrase('mjc_exchange') }}</a></li>
+	</xf:if>
+	<!--[XF:content_links:bottom]-->
+</ul>
+
+<!--[XF:menu_separator:below_content_links]-->
+<hr class="menu-separator" />
+
+<ul class="listPlain listColumns listColumns--narrow listColumns--together">
+	<!--[XF:account_links:top]-->
+	<li><a href="{{ link('mjc-credits') }}" class="menu-linkRow">{{ phrase('mjc_overview') }}</a></li>
+	<li><a href="{{ link('mjc-credits/transactions') }}" class="menu-linkRow">{{ phrase('mjc_transactions') }}</a></li>
+	<!--[XF:account_links:bottom]-->
+</ul>]]></template>
+  <template type="public" title="mjc_widget_balance" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:if is="$currencies">
+	<xf:css src="mjc_balance.less" />
+	<div class="block mjc-balance"{{ widget_data($widget) }}>
+		<div class="block-container">
+			<h3 class="block-minorHeader">{$title}</h3>
+			<div class="block-body">
+				<xf:foreach loop="$currencies" key="$currencyId" value="$currency">
+					<div class="block-row">
+						<div class="contentRow">
+							<div class="contentRow-main">
+								<h4 class="contentRow-header">
+									<span class="">{$currency.title}</span>
+								</h4>
+								<h3 class="contentRow-title">
+									<span class="mjc-balance" data-currencyid="{$currencyId}">{$xf.visitor.{$currency.column}|mjc_currency($currencyId)}</span>
+									<xf:macro name="currency_more_actions" arg-currency="{$currency}" />
+								</h3>
+							</div>
+						</div>
+					</div>
+				</xf:foreach>
+			</div>
+			<div class="block-footer">
+				{{ phrase('last_updated:') }} <span class="mjc-last-update-balance"><xf:date time="{$xf.time}" data-full-old-date="true" /></span>
+			</div>
+		</div>
+	</div>
+	<xf:comment>
+		<div class="block-wallet" attributes="{{ widget_data($widget, true) }}">
+			<xf:foreach loop="{$currencies}" value="$currency">
+				<div class="block">
+					<div class="block-container">
+						<h3 class="block-minorHeader">{{ phrase('mjc_x_wallet', {'currency': {$currency.title}}) }}</h3>
+						<div class="block-body block-row">
+							<div class="contentRow">
+								<div class="contentRow-main">
+									<span class="contentRow-snippet">
+										{{ phrase('mjc_available') }}
+									</span>
+									<h3 class="contentRow-title">
+										<span class="mjcBalance" data-currencyid="{$currency.currency_id}">{$xf.visitor.{$currency.column}|mjc_currency($currency.currency_id)}</span>
+									</h3>
+								</div>
+							</div>
+						</div>
+						<div class="block-footer">
+							<span class="contentRow-lesser">
+								{{ phrase('last_updated:') }} <span class="lastUpdateCredit"><xf:date time="{$xf.time}" data-full-old-date="true" /></span>
+							</span>
+							<span class="block-footer-controls">
+								<xf:macro name="currency_more_actions" arg-currency="{$currency}" />
+							</span>
+						</div>
+					</div>
+				</div>
+			</xf:foreach>
+		</div>
+	</xf:comment>
+</xf:if>
+
+
+<xf:macro name="currency_more_actions"
+	arg-currency="!">
+	<xf:if contentcheck="true">
+		<span class="buttonGroup-buttonWrapper">
+			<xf:button class="button--link menuTrigger" data-xf-click="menu" aria-expanded="false" aria-haspopup="true" title="{{ phrase('more_options')|for_attr }}">&#8226;&#8226;&#8226;</xf:button>
+			<div class="menu" data-menu="menu" aria-hidden="true">
+				<div class="menu-content">
+					<h4 class="menu-header">{{ phrase('more_options') }}</h4>
+					<xf:contentcheck>
+						<!--[XF:currency_tools_menu:top]-->
+						<xf:if is="{$currency.canTransfer}">
+							<a href="{{ link('mjc-credits/send-credit', null, {'currency_id' : $currency.currency_id}) }}" class="menu-linkRow">
+								<span class="button-text">{{ phrase('mjc_send') }}</span>
+							</a>
+						</xf:if>
+						<a href="{{ link('mjc-credits/transactions', null, {'currency_id' : $currency.currency_id}) }}" class="menu-linkRow">
+							<span class="button-text">{{ phrase('mjc_transactions') }}</span>
+						</a>
+						<!--[XF:currency_tools_menu:bottom]-->
+					</xf:contentcheck>
+				</div>
+			</div>
+		</span>
+	</xf:if>
+</xf:macro>]]></template>
+  <template type="public" title="mjc_widget_richest_members" version_id="1000034" version_string="1.0.0"><![CDATA[<xf:if is="$richestList">
+	<xf:if contentcheck="true">
+		<div class="block mjc-richest"{{ widget_data($widget) }}>
+			<div class="block-container">
+				<h3 class="block-minorHeader">{$title}</h3>
+				<div class="block-body block-row">
+					<xf:contentcheck>
+						<xf:foreach loop="$richestList" key="$currencyId" value="$richest">
+							<xf:if contentcheck="true">
+								<div class="block-row block-row--minor">
+									<h4 class="block-textHeader">
+										{$currencies.{$currencyId}.title}
+									</h4>
+									<xf:contentcheck>
+										<xf:foreach loop="$richest" value="$user">
+											<dl class="pairs pairs--justified">
+												<dt class="is-sentence"><xf:username user="$user" rich="true" /></dt>
+												<dd>{$user.{$currencies.{$currencyId}.column}|mjc_currency($currencyId)}</dd>
+											</dl>
+										</xf:foreach>
+									</xf:contentcheck>
+								</div>
+							</xf:if>
+						</xf:foreach>
+					</xf:contentcheck>
+				</div>
+			</div>
+		</div>
+	</xf:if>
+</xf:if>]]></template>
+  <template type="public" title="mjc_widget_user_clock_in_every_day" version_id="1040800" version_string="1.4.8"><![CDATA[<xf:if is="{$xf.visitor.user_id}">
+	<div class="block" {{ widget_data($widget) }}>
+		<div class="block-container">
+			<h3 class="block-minorHeader">{{ $title ?: phrase('mjc_clock') }}</h3>
+			<div class="block-body block-row">
+				<div class="contentRow">
+					<div class="contentRow-main">
+
+						<!-- 一键签到按钮 -->
+						<h3 class="contentRow-header">
+							<xf:if is="$allSignedToday">
+								<xf:button class="button--cta">{{ phrase('mjc_has_clock') }}</xf:button>
+								<xf:else />
+								<xf:form action="{{ link('mjc-credits/clock') }}" class="block">
+									<xf:foreach loop="$currencies" value="$currency">
+										<xf:hiddenval name="currency_ids[]" value="{$currency.currency_id}" />
+									</xf:foreach>
+									<xf:button type="submit" class="button--cta">
+										{{ phrase('mjc_clock') }}
+									</xf:button>
+								</xf:form>
+							</xf:if>
+						</h3>
+
+						<!-- 每个货币的统计数据 -->
+						<xf:foreach loop="$clockStats" value="$stat">
+							<div class="contentRow-minor">
+								<strong>{$stat.currency.title}</strong>
+								<ul class="listInline listInline--bullet">
+									<dl class="pairs pairs--justified fauxBlockLink">
+										<dt>{{ phrase('mjc_sign_in_times') }}</dt>
+										<dd>{$stat.clockCount}</dd>
+									</dl>
+									<dl class="pairs pairs--justified fauxBlockLink">
+										<dt>{{ phrase('mjc_reward_this_month') }}</dt>
+										<dd>{$stat.total}</dd>
+									</dl>
+								</ul>
+							</div>
+						</xf:foreach>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</xf:if>
+
+
+
+<xf:css>
+	[data-widget-definition="mjc_clock_in_every_day"] .contentRow-header {
+  margin: 10px;
+  text-align: center
+	}
+</xf:css>]]></template>
+  <template type="public" title="mjc_withdraw" version_id="1000000" version_string="1.0.0"><![CDATA[]]></template>
+</templates>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<routes>
+  <route route_type="admin" route_prefix="mjc-credits" controller="MJ\Credits:Credit" context="mjcStats"/>
+  <route route_type="admin" route_prefix="mjc-credits" sub_name="currencies" format="currencies/:int&lt;currency_id,title&gt;/" controller="MJ\Credits:Currency" context="mjcCurrencies"/>
+  <route route_type="admin" route_prefix="mjc-credits" sub_name="events" format="events/:int&lt;event_id,title&gt;/" controller="MJ\Credits:Event" context="mjcListAllEvents"/>
+  <route route_type="admin" route_prefix="mjc-credits" sub_name="events/definitions" format="events/definitions/:str&lt;definition_id&gt;/" controller="MJ\Credits:Event" context="mjcEventDefinitions" action_prefix="definition"/>
+  <route route_type="admin" route_prefix="mjc-credits" sub_name="transactions" format="transactions/:int&lt;transaction_id,title&gt;/" controller="MJ\Credits:Transaction" context="mjcListAllTransactions"/>
+  <route route_type="admin" route_prefix="mjc-credits" sub_name="user-edit" format="user-edit/:int&lt;user_id,username&gt;/" controller="MJ\Credits:Credit" context="mjcCredits" action_prefix="UserEdit"/>
+  <route route_type="public" route_prefix="mjc-credits" controller="MJ\Credits:Credit" context="mjcCredits"/>
+  <route route_type="public" route_prefix="mjc-credits" sub_name="transactions" format="transactions/:int&lt;transaction_id,definition_id&gt;/" controller="MJ\Credits:Transaction" context="mjcCredits"/>
+</routes>

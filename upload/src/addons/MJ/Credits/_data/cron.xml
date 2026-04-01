@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cron>
+  <entry entry_id="mjcBirthday" cron_class="MJ\Credits\Cron\Birthday" cron_method="trigger" active="1"><![CDATA[{"day_type":"dom","dom":[-1],"hours":[0],"minutes":[10]}]]></entry>
+  <entry entry_id="mjcCounters" cron_class="MJ\Credits\Cron\Counters" cron_method="recordDailyStats" active="1"><![CDATA[{"day_type":"dom","dom":[-1],"hours":[0],"minutes":[40]}]]></entry>
+</cron>
